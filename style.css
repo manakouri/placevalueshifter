@@ -317,7 +317,7 @@ p {
 #place-value-table {
   margin-top: 2rem;
   padding: 1rem;
-  background-color: var(--dark-blue); /* Matches header background */
+  background-color: var(--white); /* Matches header background */
   border-radius: 8px;
 }
 
@@ -341,7 +341,7 @@ p {
 }
 
 #place-value-table td {
-  background-color: var(--cream);
+  background-color: var(--white);
   font-size: 1.1rem;
 }
 
