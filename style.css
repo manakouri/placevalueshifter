@@ -4,13 +4,13 @@
     --mid-blue: #40798c;
     --teal: #70a9a1;
     --light-grey: #cfd7c7;
-    --cream: #f6f1d1;
+    --azure: #edf7f6;
     --white: #fcfcff
 }
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background-color: var(--white);
+    background-color: var(--azure);
     color: var(--white);
     margin: 0;
     padding: 20px;
