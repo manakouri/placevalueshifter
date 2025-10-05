@@ -37,7 +37,9 @@ async function init() {
         return;
     }
 
-    teamNameDisplay.textContent = teamName;
+     teamNameDisplay.textContent = teamName;
+    renderPlaceValueTable(); // NEW: Call the function here
+
     gameDocRef = doc(db, 'games', gameCode);
     
     // NEW: Fetch the game settings once at the start
@@ -285,6 +287,37 @@ function endGame(playerData) {
         <strong>Final Score:</strong> ${playerData.score}<br>
         <strong>Questions Correct:</strong> ${playerData.questionsCorrect}<br>
         <strong>Accuracy:</strong> ${accuracy}%
+    `;
+}
+
+function renderPlaceValueTable() {
+    const div = document.getElementById('place-value-table');
+    if (!div) return;
+
+    // This creates the HTML for the table and inserts it into the div
+    div.innerHTML = `
+        <table>
+            <tr>
+                <th>Thousands</th>
+                <th>Hundreds</th>
+                <th>Tens</th>
+                <th>Ones</th>
+                <th>&nbsp;</th>
+                <th>Tenths</th>
+                <th>Hundredths</th>
+                <th>Thousandths</th>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style="font-size: 2rem; border: none; background: none;">.</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
     `;
 }
 
