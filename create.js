@@ -40,7 +40,7 @@ async function validateAndCreateGame(codeToValidate) {
     const potentialDocRef = doc(db, 'games', codeToValidate);
     
     try {
-        const docSnap = await getDoc(potentialDocdRef);
+        const docSnap = await getDoc(potentialDocRef);
 
         if (docSnap.exists()) {
             // If code is taken, generate a new one, display it, and try again.
