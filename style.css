@@ -268,9 +268,10 @@ p {
 }
 .modal-content {
     background-color: var(--mid-blue);
-    padding: 30px;
+    padding: 30px 40px; /* Increased padding */
     border-radius: 10px;
     text-align: center;
+    min-width: 300px; /* Ensures it has some width */
 }
 .secret-box-container {
     display: flex;
@@ -278,9 +279,10 @@ p {
     margin-top: 20px;
 }
 .secret-box {
-    font-size: 4rem;
+    font-size: 6rem; /* Much bigger! */
     cursor: pointer;
     transition: transform 0.2s;
+    padding: 10px 20px; /* Add some space around the emoji */
 }
 .secret-box:hover {
     transform: scale(1.1);
