@@ -313,6 +313,38 @@ p {
     transform: scale(1.1);
 }
 
+/* --- Place Value Table Styles --- */
+#place-value-table {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: var(--dark-blue); /* Matches header background */
+  border-radius: 8px;
+}
+
+#place-value-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#place-value-table th, 
+#place-value-table td {
+  border: 2px solid var(--mid-blue);
+  padding: 0.5rem;
+  text-align: center;
+  color: var(--dark-blue);
+  font-weight: bold;
+}
+
+#place-value-table th {
+  background-color: var(--teal);
+  font-size: 0.9rem;
+}
+
+#place-value-table td {
+  background-color: var(--cream);
+  font-size: 1.1rem;
+}
+
 /* --- Responsive Design --- */
 @media (max-width: 768px) {
     .game-setup-grid {
