@@ -54,18 +54,17 @@ function listenForGameChanges() {
         const gameData = doc.data();
         if (!gameData) return;
 
-        // Update score display
         if (gameData.players && gameData.players[teamName]) {
             scoreDisplay.textContent = `Score: ${gameData.players[teamName].score}`;
         }
 
-        // Handle game state changes
         switch (gameData.gameState) {
             case 'running':
-                if (waitingArea.style.display !== 'none') {
+                // The startGame function now handles the first question.
+                // We only call it if the waiting area is still visible.
+                if (!waitingArea.classList.contains('hidden')) {
                     startGame(gameData.gameStartTime.toMillis(), gameData.gameLengthMinutes);
                 }
-                displayNewQuestion(gameData.currentQuestion);
                 break;
             case 'finished':
                 endGame(gameData.players[teamName]);
