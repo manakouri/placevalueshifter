@@ -19,29 +19,55 @@ let timerInterval;
 
 // --- Game Initialization ---
 async function createNewGame() {
-    gameCode = Math.random().toString().substring(2, 9);
-    gameCodeDisplay.textContent = gameCode;
-    gameDocRef = doc(db, 'games', gameCode);
+    let isCodeUnique = false;
+    let newGameCode;
+    
+    // Loop until a unique code is generated and the game is created
+    while (!isCodeUnique) {
+        // 1. Generate a new 7-digit random code
+        newGameCode = Math.floor(1000000 + Math.random() * 9000000).toString();
+        const potentialDocRef = doc(db, 'games', newGameCode);
+        
+        try {
+            // 2. Check if a document with this code already exists
+            const docSnap = await getDoc(potentialDocRef);
+            
+            if (!docSnap.exists()) {
+                // 3. If the code is unique, set it as the official game code and create the document
+                isCodeUnique = true;
+                gameCode = newGameCode;
+                gameDocRef = potentialDocRef;
+                
+                gameCodeDisplay.textContent = gameCode; // Display the confirmed unique code
 
-    const questionTypes = getSelectedQuestionTypes();
-    const gameLength = document.getElementById('game-length').value;
+                const questionTypes = getSelectedQuestionTypes();
+                const gameLength = document.getElementById('game-length').value;
 
-    try {
-        await setDoc(gameDocRef, {
-            gameCode: gameCode,
-            gameLengthMinutes: parseInt(gameLength, 10),
-            questionTypes: questionTypes,
-            players: {},
-            gameState: 'waiting', // waiting, running, finished
-            createdAt: serverTimestamp()
-        });
-        listenForPlayers();
-        gameView.style.display = 'block';
-    } catch (e) {
-        console.error("Error creating game: ", e);
-        alert("Could not create game. Please check console for errors.");
+                // 4. Create the game document in Firestore
+                await setDoc(gameDocRef, {
+                    gameCode: gameCode,
+                    gameLengthMinutes: parseInt(gameLength, 10),
+                    questionTypes: questionTypes,
+                    players: {},
+                    gameState: 'waiting', // waiting, running, finished
+                    createdAt: serverTimestamp()
+                });
+                
+                listenForPlayers(); // Start listening for players joining this new game
+                
+            } else {
+                // If code exists, the loop will run again to generate a new one
+                console.log(`Game code ${newGameCode} already exists. Generating a new one.`);
+            }
+        } catch (e) {
+            console.error("Error during game creation check: ", e);
+            alert("Could not create game. Check the console for errors and your Firebase connection.");
+            break; // Exit the loop on error
+        }
     }
 }
+
+
 
 // --- Player & Leaderboard Updates ---
 function listenForPlayers() {
