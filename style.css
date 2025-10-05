@@ -1,4 +1,7 @@
 /* style.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@700;900&display=swap');
+
 :root {
     --dark-blue: #0b2027;
     --mid-blue: #40798c;
@@ -9,15 +12,16 @@
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: var(--azure);
-    color: var(--white);
+    font-family: 'Helvetica', Arial, sans-serif; /* Helvetica for body text */
+    background-color: var(--dark-blue);
+    color: var(--cream);
     margin: 0;
     padding: 20px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
+    font-size: 18px; /* Increased body text size */
 }
 
 .container {
@@ -35,9 +39,11 @@ body {
     margin-top: 5vh;
 }
 
-h1, h2, h3 {
-    color: var(--white);
+h1, h2, h3, h4 { /* Added h4 for the place value chart heading */
+    font-family: 'Nunito Sans', sans-serif; /* Nunito Sans for all headings */
+    color: var(--cream);
     text-align: center;
+    font-weight: 900; /* Makes the font bold and impactful */
 }
 
 p {
