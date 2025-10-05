@@ -151,10 +151,12 @@ function showSecretBox() {
 }
 
 async function handleSecretBoxChoice(e) {
-    // Prevent clicking multiple boxes
+    const clickedBox = e.currentTarget; // Use currentTarget to get the div
+    const prizeSpan = clickedBox.querySelector('.box-prize');
+    const emojiSpan = clickedBox.querySelector('.box-emoji');
+
     secretBoxes.forEach(box => box.style.pointerEvents = 'none');
 
-    const clickedBox = e.target;
     const effects = {
         '+250': '+250 Points!',
         '*2': 'Score x2!',
@@ -165,41 +167,38 @@ async function handleSecretBoxChoice(e) {
     const chosenEffectKey = effectKeys[Math.floor(Math.random() * effectKeys.length)];
     const effectText = effects[chosenEffectKey];
     
-    // 1. Reveal the prize in the box that was clicked
-    clickedBox.textContent = effectText;
-    clickedBox.style.fontSize = '2rem'; // Use a smaller font for the text prize
+    // 1. Reveal the prize in the span
+    prizeSpan.textContent = effectText;
+    prizeSpan.classList.add('revealed');
+    emojiSpan.style.transform = 'scale(1.2)'; // Make the chosen box pop
 
-    // Get current score and calculate the new score
+    // (Score calculation logic remains the same...)
     const gameDoc = await getDoc(gameDocRef);
     const currentScore = gameDoc.data().players[teamName].score;
     let newScore = currentScore;
 
-    if (chosenEffectKey === '+250') {
-        newScore += 250;
-    } else if (chosenEffectKey === '*2') {
-        newScore *= 2;
-    } else if (chosenEffectKey === '*0.5') {
-        newScore = Math.round(newScore / 2);
-    } else if (chosenEffectKey === '*3') {
-        newScore *= 3;
-    }
+    if (chosenEffectKey === '+250') newScore += 250;
+    else if (chosenEffectKey === '*2') newScore *= 2;
+    else if (chosenEffectKey === '*0.5') newScore = Math.round(newScore / 2);
+    else if (chosenEffectKey === '*3') newScore *= 3;
     
-    // Update the score in Firebase immediately
-    await updateDoc(gameDocRef, {
-        [`players.${teamName}.score`]: newScore
-    });
+    await updateDoc(gameDocRef, { [`players.${teamName}.score`]: newScore });
 
-    // 2. Wait 2.5 seconds before hiding the modal
+    // 2. Wait before hiding the modal and resetting
     setTimeout(() => {
         secretBoxModal.classList.add('hidden');
 
         // 3. Reset all boxes for the next time
         secretBoxes.forEach(box => {
-            box.textContent = '🎁';
-            box.style.fontSize = '6rem'; // Reset font size
-            box.style.pointerEvents = 'auto'; // Re-enable clicking
+            box.querySelector('.box-prize').classList.remove('revealed');
+            box.querySelector('.box-prize').textContent = '';
+            box.querySelector('.box-emoji').style.transform = 'scale(1)';
+            box.style.pointerEvents = 'auto';
         });
-    }, 2500); // 2500 milliseconds = 2.5 seconds
+        
+        // After the box is chosen, immediately get the next question for everyone.
+        window.parent.generateNewQuestion();
+    }, 2500); 
 }
 
 
