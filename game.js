@@ -77,6 +77,7 @@ function startGame(startTime, lengthMinutes) {
     waitingArea.classList.add('hidden');
     questionArea.classList.remove('hidden');
     startTimer(startTime, lengthMinutes);
+    displayNewQuestion(); // This is the single, correct call.
 }
 
 function displayNewQuestion() {
