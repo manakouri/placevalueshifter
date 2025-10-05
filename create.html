@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Game - Place Value Shifter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create a New Game</h1>
+        
+        <div class="game-setup-grid">
+            <div class="setup-column">
+                <h2>Game Settings</h2>
+                <div class="game-code-container">
+                    Game Code: <span id="game-code-display"></span>
+                </div>
+
+                <label for="game-length">Game Length:</label>
+                <select id="game-length">
+                    <option value="5">5 Minutes</option>
+                    <option value="7">7 Minutes</option>
+                    <option value="10">10 Minutes</option>
+                </select>
+
+                <h3>Question Types:</h3>
+                <div class="checkbox-grid">
+                    <label><input type="checkbox" name="q-type" value="w_x_10_100" checked> Whole Nos. (x10, x100)</label>
+                    <label><input type="checkbox" name="q-type" value="w_d_10" checked> Whole Nos. (÷10)</label>
+                    <label><input type="checkbox" name="q-type" value="w_d_100" checked> Whole Nos. (÷100)</label>
+                    <label><input type="checkbox" name="q-type" value="d1_x_10_100" checked> 1dp Decimals (x10, x100)</label>
+                    <label><input type="checkbox" name="q-type" value="d1_d_10" checked> 1dp Decimals (÷10)</label>
+                    <label><input type="checkbox" name="q-type" value="d1_d_100"> 1dp Decimals (÷100)</label>
+                    <label><input type="checkbox" name="q-type" value="d2_x_10_100"> 2dp Decimals (x10, x100)</label>
+                    <label><input type="checkbox" name="q-type" value="d2_d_10"> 2dp Decimals (÷10)</label>
+                </div>
+                <button id="start-game-btn" class="btn" disabled>Start Game</button>
+            </div>
+
+            <div class="setup-column">
+                <h2>Teams Joined</h2>
+                <ul id="team-list">
+                    <li>Waiting for teams to join...</li>
+                </ul>
+                <div id="game-view">
+                    <h2>Live Game</h2>
+                    <div id="timer-display" class="timer">00:00</div>
+                    <h3>Leaderboard</h3>
+                    <div id="leaderboard"></div>
+                    <div id="final-results" class="hidden">
+                        <h2>Final Results</h2>
+                        <div id="final-leaderboard"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="create.js"></script>
+</body>
+</html>
