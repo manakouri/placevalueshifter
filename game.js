@@ -24,6 +24,7 @@ let correctStreak = 0;
 let nextBoxRequirement = Math.floor(Math.random() * 4) + 2; // 2-5
 let timerInterval;
 let gameSettings = {}; // NEW: To store question types locally
+let gameHasStarted = false;
 
 // --- Initialization ---
 async function init() {
@@ -58,17 +59,13 @@ function listenForGameChanges() {
             scoreDisplay.textContent = `Score: ${gameData.players[teamName].score}`;
         }
 
-        switch (gameData.gameState) {
-            case 'running':
-                // The startGame function now handles the first question.
-                // We only call it if the waiting area is still visible.
-                if (!waitingArea.classList.contains('hidden')) {
-                    startGame(gameData.gameStartTime.toMillis(), gameData.gameLengthMinutes);
-                }
-                break;
-            case 'finished':
-                endGame(gameData.players[teamName]);
-                break;
+        // Check if the game is running AND we haven't started the game locally yet
+        if (gameData.gameState === 'running' && !gameHasStarted) {
+            gameHasStarted = true; // Set the flag so this only runs once
+            startGame(gameData.gameStartTime.toMillis(), gameData.gameLengthMinutes);
+        } 
+        else if (gameData.gameState === 'finished') {
+            endGame(gameData.players[teamName]);
         }
     });
 }
