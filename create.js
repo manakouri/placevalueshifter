@@ -1,6 +1,6 @@
 // create.js
 import { db } from './firebase-config.js';
-import { doc, setDoc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
 
 // DOM Elements
 const gameCodeDisplay = document.getElementById('game-code-display');
@@ -10,78 +10,90 @@ const timerDisplay = document.getElementById('timer-display');
 const leaderboardDiv = document.getElementById('leaderboard');
 const finalResultsDiv = document.getElementById('final-results');
 const finalLeaderboardDiv = document.getElementById('final-leaderboard');
-const gameView = document.getElementById('game-view');
 
+// Global game variables
 let gameCode;
 let gameDocRef;
-let unsubscribe; // To stop listening to changes when game ends
-let timerInterval;
+let unsubscribeFromPlayers;
+let gameUpdateInterval;
 
-// --- Game Initialization ---
-async function createNewGame() {
-    let isCodeUnique = false;
-    let newGameCode;
+/**
+ * Main function to set up the game on page load.
+ * It generates a code, displays it immediately, and then
+ * validates and creates the game in the database.
+ */
+async function setupGame() {
+    // 1. Generate and display a code immediately for the user.
+    const initialCode = Math.floor(1000000 + Math.random() * 9000000).toString();
+    gameCodeDisplay.textContent = initialCode;
+
+    // 2. Start the process of validating the code and creating the game.
+    await validateAndCreateGame(initialCode);
+}
+
+/**
+ * Checks if a game code is unique. If it is, creates the game.
+ * If not, generates a new code and repeats the process.
+ * @param {string} codeToValidate The game code to check.
+ */
+async function validateAndCreateGame(codeToValidate) {
+    const potentialDocRef = doc(db, 'games', codeToValidate);
     
-    // Loop until a unique code is generated and the game is created
-    while (!isCodeUnique) {
-        // 1. Generate a new 7-digit random code
-        newGameCode = Math.floor(1000000 + Math.random() * 9000000).toString();
-        const potentialDocRef = doc(db, 'games', newGameCode);
-        
-        try {
-            // 2. Check if a document with this code already exists
-            const docSnap = await getDoc(potentialDocRef);
+    try {
+        const docSnap = await getDoc(potentialDocdRef);
+
+        if (docSnap.exists()) {
+            // If code is taken, generate a new one, display it, and try again.
+            console.warn(`Code ${codeToValidate} exists. Generating a new one.`);
+            const newCode = Math.floor(1000000 + Math.random() * 9000000).toString();
+            gameCodeDisplay.textContent = newCode;
+            await validateAndCreateGame(newCode); // Recursive call with the new code
+        } else {
+            // The code is unique and available. Let's create the game.
+            gameCode = codeToValidate;
+            gameDocRef = potentialDocRef;
             
-            if (!docSnap.exists()) {
-                // 3. If the code is unique, set it as the official game code and create the document
-                isCodeUnique = true;
-                gameCode = newGameCode;
-                gameDocRef = potentialDocRef;
-                
-                gameCodeDisplay.textContent = gameCode; // Display the confirmed unique code
+            const questionTypes = getSelectedQuestionTypes();
+            const gameLength = document.getElementById('game-length').value;
 
-                const questionTypes = getSelectedQuestionTypes();
-                const gameLength = document.getElementById('game-length').value;
+            await setDoc(gameDocRef, {
+                gameCode: gameCode,
+                gameLengthMinutes: parseInt(gameLength, 10),
+                questionTypes: questionTypes,
+                players: {},
+                gameState: 'waiting', // waiting, running, finished
+                createdAt: serverTimestamp()
+            });
 
-                // 4. Create the game document in Firestore
-                await setDoc(gameDocRef, {
-                    gameCode: gameCode,
-                    gameLengthMinutes: parseInt(gameLength, 10),
-                    questionTypes: questionTypes,
-                    players: {},
-                    gameState: 'waiting', // waiting, running, finished
-                    createdAt: serverTimestamp()
-                });
-                
-                listenForPlayers(); // Start listening for players joining this new game
-                
-            } else {
-                // If code exists, the loop will run again to generate a new one
-                console.log(`Game code ${newGameCode} already exists. Generating a new one.`);
-            }
-        } catch (e) {
-            console.error("Error during game creation check: ", e);
-            alert("Could not create game. Check the console for errors and your Firebase connection.");
-            break; // Exit the loop on error
+            // Now that the game is created, start listening for players.
+            listenForPlayers();
         }
+    } catch (error) {
+        console.error("Firebase Error: Could not validate or create game.", error);
+        gameCodeDisplay.textContent = "ERROR";
+        alert("Could not connect to the server to create a game. Please check your internet connection and refresh the page.");
     }
 }
 
 
-
 // --- Player & Leaderboard Updates ---
 function listenForPlayers() {
-    unsubscribe = onSnapshot(gameDocRef, (doc) => {
+    unsubscribeFromPlayers = onSnapshot(gameDocRef, (doc) => {
         const gameData = doc.data();
         if (!gameData) return;
 
         const players = gameData.players || {};
         updateTeamList(Object.keys(players));
-        updateLeaderboard(players);
+        
+        if (gameData.gameState !== 'waiting') {
+            updateLeaderboard(players);
+        }
 
         // Enable start button when at least one player joins
         if (Object.keys(players).length > 0 && gameData.gameState === 'waiting') {
             startGameBtn.disabled = false;
+        } else {
+            startGameBtn.disabled = true;
         }
 
         if (gameData.gameState === 'finished') {
@@ -121,7 +133,6 @@ async function startGame() {
     const gameLength = document.getElementById('game-length').value;
     const questionTypes = getSelectedQuestionTypes();
     
-    // Update game settings in case they were changed after creation
     await updateDoc(gameDocRef, {
         gameState: 'running',
         gameStartTime: serverTimestamp(),
@@ -130,12 +141,13 @@ async function startGame() {
     });
 
     startTimer(parseInt(gameLength, 10));
-    generateNewQuestion();
+    gameUpdateInterval = setInterval(generateNewQuestion, 5000); // Generate a new question every 5 seconds
+    generateNewQuestion(); // Generate the first question immediately
 }
 
 function startTimer(minutes) {
     let seconds = minutes * 60;
-    timerInterval = setInterval(async () => {
+    const timerInterval = setInterval(async () => {
         seconds--;
         const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
         const secs = (seconds % 60).toString().padStart(2, '0');
@@ -143,15 +155,17 @@ function startTimer(minutes) {
 
         if (seconds <= 0) {
             clearInterval(timerInterval);
+            clearInterval(gameUpdateInterval); // Stop generating new questions
             await updateDoc(gameDocRef, { gameState: 'finished' });
-            unsubscribe(); // Stop listening for live updates
+            if (unsubscribeFromPlayers) unsubscribeFromPlayers();
         }
     }, 1000);
 }
 
 function showFinalResults(players) {
     finalResultsDiv.classList.remove('hidden');
-    finalLeaderboardDiv.innerHTML = '';
+    leaderboardDiv.classList.add('hidden'); // Hide live leaderboard
+    finalLeaderboardDiv.innerHTML = '<h3>Final Scores</h3>';
     const sortedPlayers = Object.entries(players).sort((a, b) => b[1].score - a[1].score);
 
     sortedPlayers.forEach(([name, data]) => {
@@ -159,10 +173,9 @@ function showFinalResults(players) {
         const entry = document.createElement('div');
         entry.className = 'leaderboard-entry';
         entry.innerHTML = `
-            <span>${name}</span>
-            <span>Score: ${data.score}</span>
-            <span>Correct: ${data.questionsCorrect}</span>
-            <span>Accuracy: ${accuracy}%</span>
+            <span><strong>${name}</strong></span>
+            <span>${data.score} pts</span>
+            <span>${data.questionsCorrect}/${data.questionsAnswered} (${accuracy}%)</span>
         `;
         finalLeaderboardDiv.appendChild(entry);
     });
@@ -171,11 +184,15 @@ function showFinalResults(players) {
 
 // --- Question Generation ---
 async function generateNewQuestion() {
-    const gameData = (await getDoc(gameDocRef)).data();
+    const docSnap = await getDoc(gameDocRef);
+    const gameData = docSnap.data();
     if (gameData.gameState !== 'running') return;
 
     const enabledTypes = Object.keys(gameData.questionTypes).filter(k => gameData.questionTypes[k]);
-    if (enabledTypes.length === 0) return;
+    if (enabledTypes.length === 0) {
+        console.error("No question types selected!");
+        return;
+    }
 
     const type = enabledTypes[Math.floor(Math.random() * enabledTypes.length)];
     const question = createQuestion(type);
@@ -186,56 +203,50 @@ async function generateNewQuestion() {
             id: Date.now() // Unique ID for this question
         }
     });
-    
-    // Generate next question after a short delay
-    setTimeout(generateNewQuestion, 5000); // New question every 5 seconds
 }
 
 function createQuestion(type) {
     let a, b, c;
-    const operators = ['x', '÷'];
-    const powerOf10 = [10, 100, 1000, 0.1, 0.01];
     const operator = type.includes('_x_') ? '×' : '÷';
 
     // Generate 'a' based on type
-    if (type.startsWith('w_')) { // Whole number
-        a = Math.floor(Math.random() * 90) + 10; // 10-99
-    } else if (type.startsWith('d1_')) { // 1dp
+    if (type.startsWith('w_')) {
+        a = Math.floor(Math.random() * 90) + 10;
+    } else if (type.startsWith('d1_')) {
         a = parseFloat(((Math.random() * 9) + 1).toFixed(1));
     } else { // 2dp
-        a = parseFloat(((Math.random() * 9) + 1).toFixed(2));
+        a = parseFloat(((Math.random() * 90) + 1).toFixed(2));
     }
 
     // Generate 'b' based on type
     if (type.includes('10_100')) {
         b = Math.random() < 0.5 ? 10 : 100;
+    } else if (type.includes('_10')) {
+        b = 10;
     } else {
-        b = parseInt(type.split('_').pop());
+        b = 100;
     }
 
     // Calculate 'c'
     c = operator === '×' ? a * b : a / b;
-    c = parseFloat(c.toPrecision(15)); // Handle floating point issues
+    c = parseFloat(c.toPrecision(15));
 
-    // Decide which part is missing (a, b, or c)
-    const missingPart = Math.floor(Math.random() * 3); // 0=a, 1=b, 2=c
+    // Decide which part is missing
+    const missingPart = Math.floor(Math.random() * 3);
     let problem, answer;
-    let options = [];
 
     if (missingPart === 0) { // a is missing
         problem = `? ${operator} ${b} = ${c}`;
         answer = a;
-        options = generateDistractors(answer, false);
     } else if (missingPart === 1) { // b is missing
         problem = `${a} ${operator} ? = ${c}`;
         answer = b;
-        options = generateDistractors(answer, true);
     } else { // c is missing
         problem = `${a} ${operator} ${b} = ?`;
         answer = c;
-        options = generateDistractors(answer, false);
     }
 
+    const options = generateDistractors(answer, missingPart === 1);
     return { problem, options, answer };
 }
 
@@ -245,18 +256,20 @@ function generateDistractors(correctAnswer, isPowerOf10) {
     const powerOf10Options = [10, 100, 1000, 0.1, 0.01];
 
     if (isPowerOf10) {
-        while (distractors.size < 4 && distractors.size < powerOf10Options.length) {
-            distractors.add(powerOf10Options[Math.floor(Math.random() * powerOf10Options.length)]);
+        while (distractors.size < 4) {
+            const randomPower = powerOf10Options[Math.floor(Math.random() * powerOf10Options.length)];
+            distractors.add(randomPower);
         }
     } else {
-        while (distractors.size < 4) {
-            const multiplier = multipliers[Math.floor(Math.random() * multipliers.length)];
-            let distractor = correctAnswer * multiplier;
-            distractor = parseFloat(distractor.toPrecision(15));
-            // Check if it's a completely different number or a duplicate
-            if (distractor.toString().replace('.', '').includes(correctAnswer.toString().replace('.', ''))) {
-                 distractors.add(distractor);
+        // Add distractors with the same digits but wrong place value
+        for (const m of multipliers) {
+            if (distractors.size < 4) {
+                distractors.add(parseFloat((correctAnswer * m).toPrecision(15)));
             }
+        }
+        // If we still don't have enough, add some random variations
+        while (distractors.size < 4) {
+             distractors.add(parseFloat((correctAnswer / (multipliers[distractors.size-1] * 10)).toPrecision(15)));
         }
     }
 
@@ -273,7 +286,6 @@ function getSelectedQuestionTypes() {
     return types;
 }
 
-
 // --- Event Listeners ---
-window.addEventListener('load', createNewGame);
+window.addEventListener('load', setupGame);
 startGameBtn.addEventListener('click', startGame);
