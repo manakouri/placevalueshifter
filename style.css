@@ -235,6 +235,30 @@ p {
     background-color: white;
 }
 
+.secret-box {
+    position: relative; /* Needed for positioning the prize text */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.box-prize {
+    position: absolute;
+    bottom: -30px; /* Position it just below the box */
+    left: 0;
+    right: 0;
+    font-size: 1.5rem; /* Make it a readable size */
+    font-weight: bold;
+    color: var(--cream);
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s;
+}
+
+.box-prize.revealed {
+    opacity: 1; /* Make it visible when revealed */
+}
+
 /* --- Utility --- */
 .hidden { display: none !important; }
 
