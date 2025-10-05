@@ -141,8 +141,9 @@ async function startGame() {
     });
 
     startTimer(parseInt(gameLength, 10));
-    gameUpdateInterval = setInterval(generateNewQuestion, 5000); // Generate a new question every 5 seconds
-    generateNewQuestion(); // Generate the first question immediately
+    // We no longer use setInterval here.
+    // The first question is generated, and the next one is triggered from within generateNewQuestion.
+    generateNewQuestion(); 
 }
 
 function startTimer(minutes) {
@@ -186,7 +187,12 @@ function showFinalResults(players) {
 async function generateNewQuestion() {
     const docSnap = await getDoc(gameDocRef);
     const gameData = docSnap.data();
-    if (gameData.gameState !== 'running') return;
+
+    // Stop generating questions if the game is no longer running
+    if (gameData.gameState !== 'running') {
+        if(gameUpdateInterval) clearTimeout(gameUpdateInterval); // Clear any pending question
+        return;
+    }
 
     const enabledTypes = Object.keys(gameData.questionTypes).filter(k => gameData.questionTypes[k]);
     if (enabledTypes.length === 0) {
@@ -203,6 +209,12 @@ async function generateNewQuestion() {
             id: Date.now() // Unique ID for this question
         }
     });
+
+    // NEW: Instead of an interval, we wait a longer time then generate the next question.
+    // This creates a chain, but doesn't rely on player answers, keeping everyone in sync.
+    // You can change this value (in milliseconds) to make the time per question longer or shorter.
+    const timePerQuestion = 15000; // 15 seconds
+    gameUpdateInterval = setTimeout(generateNewQuestion, timePerQuestion);
 }
 
 function createQuestion(type) {
