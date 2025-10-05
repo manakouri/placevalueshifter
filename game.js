@@ -144,28 +144,56 @@ function showSecretBox() {
     secretBoxModal.classList.remove('hidden');
 }
 
-async function handleSecretBoxChoice() {
-    secretBoxModal.classList.add('hidden');
-    const effects = ['+50', '*2', '*0.5', '*3']; // Add 50, Double, Halve, Triple
-    const effect = effects[Math.floor(Math.random() * effects.length)];
+async function handleSecretBoxChoice(e) {
+    // Prevent clicking multiple boxes
+    secretBoxes.forEach(box => box.style.pointerEvents = 'none');
 
+    const clickedBox = e.target;
+    const effects = {
+        '+250': '+250 Points!',
+        '*2': 'Score x2!',
+        '*0.5': 'Score Halved :(',
+        '*3': 'Score x3!!'
+    };
+    const effectKeys = Object.keys(effects);
+    const chosenEffectKey = effectKeys[Math.floor(Math.random() * effectKeys.length)];
+    const effectText = effects[chosenEffectKey];
+    
+    // 1. Reveal the prize in the box that was clicked
+    clickedBox.textContent = effectText;
+    clickedBox.style.fontSize = '2rem'; // Use a smaller font for the text prize
+
+    // Get current score and calculate the new score
     const gameDoc = await getDoc(gameDocRef);
     const currentScore = gameDoc.data().players[teamName].score;
     let newScore = currentScore;
 
-    if (effect === '+50') {
-        newScore += 50;
-    } else if (effect === '*2') {
+    if (chosenEffectKey === '+250') {
+        newScore += 250;
+    } else if (chosenEffectKey === '*2') {
         newScore *= 2;
-    } else if (effect === '*0.5') {
+    } else if (chosenEffectKey === '*0.5') {
         newScore = Math.round(newScore / 2);
-    } else if (effect === '*3') {
+    } else if (chosenEffectKey === '*3') {
         newScore *= 3;
     }
-
+    
+    // Update the score in Firebase immediately
     await updateDoc(gameDocRef, {
         [`players.${teamName}.score`]: newScore
     });
+
+    // 2. Wait 2.5 seconds before hiding the modal
+    setTimeout(() => {
+        secretBoxModal.classList.add('hidden');
+
+        // 3. Reset all boxes for the next time
+        secretBoxes.forEach(box => {
+            box.textContent = '🎁';
+            box.style.fontSize = '6rem'; // Reset font size
+            box.style.pointerEvents = 'auto'; // Re-enable clicking
+        });
+    }, 2500); // 2500 milliseconds = 2.5 seconds
 }
 
 
