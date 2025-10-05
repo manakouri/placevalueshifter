@@ -13,7 +13,7 @@
 
 body {
     font-family: 'Helvetica', Arial, sans-serif; /* Helvetica for body text */
-    background-color: var(--dark-blue);
+    background-color: var(--azure);
     color: var(--cream);
     margin: 0;
     padding: 20px;
