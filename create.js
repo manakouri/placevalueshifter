@@ -141,8 +141,7 @@ async function startGame() {
     });
 
     startTimer(parseInt(gameLength, 10));
-    // We no longer use setInterval here.
-    // The first question is generated, and the next one is triggered from within generateNewQuestion.
+    // The host now ONLY generates the very first question.
     generateNewQuestion(); 
 }
 
@@ -185,30 +184,27 @@ function showFinalResults(players) {
 
 // --- Question Generation ---
 async function generateNewQuestion() {
+    // We get a fresh reference to the doc each time
+    const gameDocRef = doc(db, 'games', gameCode); 
     const docSnap = await getDoc(gameDocRef);
     const gameData = docSnap.data();
 
-    // Stop generating questions if the game is no longer running
-    if (gameData.gameState !== 'running') {
-        if(gameUpdateInterval) clearTimeout(gameUpdateInterval); // Clear any pending question
-        return;
-    }
+    if (gameData.gameState !== 'running') return;
 
     const enabledTypes = Object.keys(gameData.questionTypes).filter(k => gameData.questionTypes[k]);
-    if (enabledTypes.length === 0) {
-        console.error("No question types selected!");
-        return;
-    }
+    if (enabledTypes.length === 0) return;
 
     const type = enabledTypes[Math.floor(Math.random() * enabledTypes.length)];
     const question = createQuestion(type);
     
+    // This simply updates the question for all players to see.
     await updateDoc(gameDocRef, {
         currentQuestion: {
             ...question,
-            id: Date.now() // Unique ID for this question
+            id: Date.now()
         }
     });
+}
 
     // NEW: Instead of an interval, we wait a longer time then generate the next question.
     // This creates a chain, but doesn't rely on player answers, keeping everyone in sync.
