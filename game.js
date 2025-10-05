@@ -259,17 +259,22 @@ function generateDistractors(correctAnswer, isPowerOf10) {
 
 
 function startTimer(startTimeMillis, lengthMinutes) {
-    const endTime = startTimeMillis + lengthMinutes * 60 * 1000;
+    const gameLengthMillis = lengthMinutes * 60 * 1000;
+    const endTime = startTimeMillis + gameLengthMillis;
 
     timerInterval = setInterval(() => {
-        const remaining = endTime - Date.now();
-        if (remaining <= 0) {
+        const now = Date.now();
+        const remainingMillis = endTime - now;
+
+        if (remainingMillis <= 0) {
             clearInterval(timerInterval);
             gameTimerDisplay.textContent = '00:00';
             return;
         }
-        const mins = Math.floor(remaining / 60000).toString().padStart(2, '0');
-        const secs = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+
+        const remainingSeconds = Math.floor(remainingMillis / 1000);
+        const mins = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+        const secs = (remainingSeconds % 60).toString().padStart(2, '0');
         gameTimerDisplay.textContent = `${mins}:${secs}`;
     }, 1000);
 }
