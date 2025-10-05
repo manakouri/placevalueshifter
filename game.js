@@ -113,17 +113,15 @@ async function handleAnswer(e) {
     
     const isCorrect = selectedAnswer === correctAnswer;
 
-    // Visual feedback
     e.target.classList.add(isCorrect ? 'correct' : 'incorrect');
     optionButtons.forEach(btn => btn.disabled = true);
 
-    // Update stats in Firebase
     const playerUpdate = {
         [`players.${teamName}.questionsAnswered`]: increment(1)
     };
     
     if (isCorrect) {
-        playerUpdate[`players.${teamName}.score`] = increment(100); // Base points
+        playerUpdate[`players.${teamName}.score`] = increment(100);
         playerUpdate[`players.${teamName}.questionsCorrect`] = increment(1);
         correctStreak++;
     } else {
@@ -132,12 +130,20 @@ async function handleAnswer(e) {
     
     await updateDoc(gameDocRef, playerUpdate);
 
-    // Check for secret box
-    if (correctStreak >= nextBoxRequirement) {
-        correctStreak = 0;
-        nextBoxRequirement = Math.floor(Math.random() * 4) + 2;
-        showSecretBox();
-    }
+    // After a short delay to show feedback, check for secret box or get a new question
+    setTimeout(() => {
+        if (correctStreak >= nextBoxRequirement) {
+            correctStreak = 0;
+            nextBoxRequirement = Math.floor(Math.random() * 4) + 2;
+            showSecretBox();
+        } else {
+            // This is the key change: we trigger a new question from the host
+            // Note: This uses a Firebase Cloud Function for security in a real app, 
+            // but for this project we'll call the host's logic directly.
+            // This will create a new question for ALL players.
+            window.parent.generateNewQuestion(); // A simplified way to call the host's function
+        }
+    }, 1500); // 1.5 second delay before next action
 }
 
 function showSecretBox() {
