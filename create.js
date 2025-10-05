@@ -211,7 +211,7 @@ async function generateNewQuestion() {
     // You can change this value (in milliseconds) to make the time per question longer or shorter.
     const timePerQuestion = 15000; // 15 seconds
     gameUpdateInterval = setTimeout(generateNewQuestion, timePerQuestion);
-}
+
 
 function createQuestion(type) {
     let a, b, c;
