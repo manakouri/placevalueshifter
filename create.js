@@ -145,20 +145,39 @@ async function startGame() {
 }
 
 function startTimer(minutes) {
-    let seconds = minutes * 60;
-    const timerInterval = setInterval(async () => {
-        seconds--;
-        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const secs = (seconds % 60).toString().padStart(2, '0');
-        timerDisplay.textContent = `${mins}:${secs}`;
+    // We need to get the official start time from Firebase
+    getDoc(gameDocRef).then(docSnap => {
+        if (!docSnap.exists() || !docSnap.data().gameStartTime) return;
 
-        if (seconds <= 0) {
-            clearInterval(timerInterval);
-            clearInterval(gameUpdateInterval); // Stop generating new questions
-            await updateDoc(gameDocRef, { gameState: 'finished' });
-            if (unsubscribeFromPlayers) unsubscribeFromPlayers();
-        }
-    }, 1000);
+        const startTimeMillis = docSnap.data().gameStartTime.toMillis();
+        const gameLengthMillis = minutes * 60 * 1000;
+        const endTime = startTimeMillis + gameLengthMillis;
+
+        const timerInterval = setInterval(async () => {
+            const now = Date.now();
+            const remainingMillis = endTime - now;
+
+            if (remainingMillis <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = '00:00';
+                // Stop generating questions if the game is over
+                if (gameUpdateInterval) clearInterval(gameUpdateInterval); 
+                
+                // Only the host sets the game state to finished
+                const gameDoc = await getDoc(gameDocRef);
+                if (gameDoc.data().gameState !== 'finished') {
+                    await updateDoc(gameDocRef, { gameState: 'finished' });
+                }
+                if (unsubscribeFromPlayers) unsubscribeFromPlayers();
+                return;
+            }
+
+            const remainingSeconds = Math.floor(remainingMillis / 1000);
+            const mins = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+            const secs = (remainingSeconds % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${mins}:${secs}`;
+        }, 1000);
+    });
 }
 
 function showFinalResults(players) {
