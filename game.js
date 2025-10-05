@@ -80,14 +80,27 @@ function displayNewQuestion(question) {
     currentQuestionId = question.id;
     questionPrompt.textContent = question.problem;
     
-    optionButtons.forEach((btn, index) => {
-        btn.textContent = question.options[index];
-        btn.dataset.answer = question.options[index];
-        btn.disabled = false;
+    // 1. Hide the options grid immediately
+    const optionsGrid = document.querySelector('.options-grid');
+    optionsGrid.classList.add('hidden');
+
+    // 2. Clear previous button text and state
+    optionButtons.forEach(btn => {
+        btn.textContent = '';
+        btn.disabled = true;
         btn.className = 'btn option'; // Reset colors
     });
 
-    canAnswer = true;
+    // 3. Set a timeout to reveal the options after 4 seconds
+    setTimeout(() => {
+        optionButtons.forEach((btn, index) => {
+            btn.textContent = question.options[index];
+            btn.dataset.answer = question.options[index];
+            btn.disabled = false; // Enable buttons now
+        });
+        optionsGrid.classList.remove('hidden'); // Show the grid
+        canAnswer = true;
+    }, 4000); // 4000 milliseconds = 4 seconds
 }
 
 async function handleAnswer(e) {
