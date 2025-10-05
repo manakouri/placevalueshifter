@@ -14,7 +14,7 @@
 body {
     font-family: 'Helvetica', 'Helvetica'; /* Helvetica for body text */
     background-color: var(--azure);
-    color: var(--cream);
+    color: var(--white);
     margin: 0;
     padding: 20px;
     display: flex;
@@ -41,7 +41,7 @@ body {
 
 h1, h2, h3, h4 { /* Added h4 for the place value chart heading */
     font-family: 'Nunito Sans', sans-serif; /* Nunito Sans for all headings */
-    color: var(--cream);
+    color: var(--white);
     text-align: center;
     font-weight: 900; /* Makes the font bold and impactful */
 }
@@ -53,7 +53,7 @@ p {
 /* --- Buttons --- */
 .btn {
     background-color: var(--teal);
-    color: var(--dark-blue);
+    color: var(--white);
     border: none;
     padding: 15px 30px;
     font-size: 1.2rem;
