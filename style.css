@@ -12,7 +12,7 @@
 }
 
 body {
-    font-family: 'Helvetica', Arial, sans-serif; /* Helvetica for body text */
+    font-family: 'Helvetica', 'Helvetica'; /* Helvetica for body text */
     background-color: var(--azure);
     color: var(--cream);
     margin: 0;
