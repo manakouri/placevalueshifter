@@ -10,6 +10,10 @@
     --light-grey: #cfd7c7;
     --azure: #edf7f6; /* Lightest background */
     --white: #fcfcff;   /* Pure white for text and elements */
+
+     --accent-pink: #f84791;
+    --accent-cyan: #57dbd8;
+    --accent-deep-blue: #25388e;
 }
 
 /* CORRECTED: Body now has a dark text colour to be visible on the light background */
@@ -42,10 +46,9 @@ body {
     margin-top: 5vh;
 }
 
-/* UPDATED: Headings now use the dark blue colour */
-h1, h2, h3, h4 {
+h1, h2, h3, h4 { 
     font-family: 'Kollektif', sans-serif;
-    color: var(--dark-blue);
+    color: var(--accent-deep-blue); /* UPDATED: Vibrant blue for headings */
     text-align: center;
 }
 
@@ -69,8 +72,9 @@ p {
 }
 
 .btn:hover:not(:disabled) {
-    background-color: var(--teal);
+    background-color: var(--accent-cyan); /* UPDATED: Bright cyan on hover */
     transform: translateY(-2px);
+    color: var(--dark-blue); /* Change text for better contrast */
 }
 
 .btn:disabled {
@@ -133,7 +137,7 @@ p {
     border: 1px solid var(--light-grey);
 }
 .game-code-container {
-    background-color: var(--dark-blue);
+    background-color: var(--accent-deep-blue); /* UPDATED */
     padding: 15px;
     text-align: center;
     border-radius: 5px;
@@ -145,11 +149,9 @@ p {
     color: var(--white);
     letter-spacing: 4px;
 }
-.checkbox-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin: 1rem 0;
+.checkbox-grid label:hover {
+    background-color: var(--accent-cyan); /* UPDATED */
+    color: var(--dark-blue);
 }
 .checkbox-grid label {
     background-color: var(--white);
@@ -237,7 +239,10 @@ p {
     height: 80px;
     font-size: 1.8rem;
 }
-.btn.correct { background-color: #63d471 !important; color: white !important; }
+.btn.correct { 
+    background-color: var(--accent-pink) !important; /* UPDATED: Fun pink for correct answers */
+    color: var(--white) !important; 
+}
 .btn.incorrect { background-color: #d94545 !important; color: white !important; }
 
 /* ... (Keep existing .pv-chart, .secret-box, .box-prize rules) ... */
