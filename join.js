@@ -1,6 +1,7 @@
 // join.js
-import { db } from './firebase-config.js';
+import { db, auth } from './firebase-config.js'; // <-- Make sure auth is imported
 import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
+import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"; // <-- Add new imports
 
 // DOM Elements
 const gameCodeInput = document.getElementById('game-code');
@@ -15,6 +16,23 @@ function validateForm() {
     joinBtn.disabled = !(code.length === 7 && name.length > 0);
 }
 
+// Add this new function to handle signing in
+function signInPlayerAnonymously() {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is already signed in.
+      console.log("User is signed in with uid:", user.uid);
+    } else {
+      // User is not signed in. Sign them in anonymously.
+      signInAnonymously(auth).catch((error) => {
+        console.error("Anonymous sign-in failed:", error);
+      });
+    }
+  });
+}
+
+// Call the function as soon as the script loads
+signInPlayerAnonymously();
 // --- Join Game Logic ---
 async function joinGame() {
     const gameCode = gameCodeInput.value.trim();
