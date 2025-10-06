@@ -1,10 +1,10 @@
 /* style.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Kollektif:wght@700&display=swap');
 
 :root {
     --dark-blue: #0b2027;
-    --mid-blue: #40798c;
+    --mid-blue: #85c8de;
     --teal: #70a9a1;
     --light-grey: #cfd7c7;
     --azure: #edf7f6;
@@ -12,7 +12,7 @@
 }
 
 body {
-    font-family: 'Helvetica', 'Helvetica'; /* Helvetica for body text */
+    font-family: 'Montserrat', sans-serif; /* Montserrat for body text */
     background-color: var(--azure);
     color: var(--white);
     margin: 0;
@@ -21,7 +21,8 @@ body {
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
-    font-size: 18px; /* Increased body text size */
+    font-size: 18px; 
+}
 }
 
 .container {
@@ -39,11 +40,10 @@ body {
     margin-top: 5vh;
 }
 
-h1, h2, h3, h4 { /* Added h4 for the place value chart heading */
-    font-family: 'Nunito Sans', sans-serif; /* Nunito Sans for all headings */
+h1, h2, h3, h4 { 
+    font-family: 'Kollektif', sans-serif; /* Kollektif for all headings */
     color: var(--white);
     text-align: center;
-    font-weight: 900; /* Makes the font bold and impactful */
 }
 
 p {
