@@ -10,6 +10,7 @@
     --light-grey: #cfd7c7;
     --azure: #edf7f6; /* Lightest background */
     --white: #fcfcff;   /* Pure white for text and elements */
+    --darker-azure: #ccedea;
 
      --accent-pink: #f84791;
     --accent-cyan: #57dbd8;
@@ -131,7 +132,7 @@ p {
     gap: 2rem;
 }
 .setup-column {
-    background-color: var(--azure); /* UPDATED: Lighter background */
+    background-color: var(--darker-azure); /* UPDATED: Lighter background */
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid var(--light-grey);
