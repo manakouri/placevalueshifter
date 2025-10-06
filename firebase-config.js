@@ -23,5 +23,4 @@ const auth = getAuth(app); // <-- Initialize Auth
 
 export { db, auth }; // <-- Export auth
 
-// Export for use in other scripts
-export { db };
+
