@@ -7,45 +7,47 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="container game-container">
+
         <div class="game-header">
             <div id="team-name-display"></div>
             <div id="score-display">Score: 0</div>
             <div id="game-timer" class="timer">--:--</div>
         </div>
         
-      <div id="game-area">
+        <div id="game-area">
     
-    <div id="waiting-area">
-        <h2>Waiting for the host to start the game...</h2>
-        <div class="spinner"></div>
-    </div>
-
-    <div id="question-area" class="hidden">
-        <div id="question-prompt" class="question"></div>
-        <div class="options-grid">
-            <button class="btn option"></button>
-            <button class="btn option"></button>
-            <button class="btn option"></button>
-            <button class="btn option"></button>
+            <div id="waiting-area">
+                <h2>Waiting for the host to start the game...</h2>
+                <div class="spinner"></div>
+            </div>
+        
+            <div id="question-area" class="hidden">
+                <div id="question-prompt" class="question"></div>
+                <div class="options-grid">
+                    <button class="btn option"></button>
+                    <button class="btn option"></button>
+                    <button class="btn option"></button>
+                    <button class="btn option"></button>
+                </div>
+            </div>
+        
+            <div id="post-game-area" class="hidden">
+                <h2>Game Over!</h2>
+                <h3>Your Results:</h3>
+                <p id="final-stats"></p>
+                <a href="index.html" class="btn">Play Again</a>
+            </div>
+        
         </div>
-    </div>
-
-    <div id="post-game-area" class="hidden">
-        <h2>Game Over!</h2>
-        <h3>Your Results:</h3>
-        <p id="final-stats"></p>
-        <a href="index.html" class="btn">Play Again</a>
-    </div>
-
-</div>
-</div>
         
         <div class="pv-chart">
             <h4>Place Value Chart</h4>
+            <img src="https://i.imgur.com/uG9pSB1.png" alt="Place value chart showing thousands to thousandths">
         </div>
-        
-            <div id="place-value-table"></div>
+
+        <div id="place-value-table"></div>
 
     </div>
 
@@ -53,22 +55,23 @@
         <div class="modal-content">
             <h2>Correct! Choose a Secret Box!</h2>
             <div class="secret-box-container">
-    <div class="secret-box" id="box1">
-        <span class="box-emoji">🎁</span>
-        <span class="box-prize"></span>
-    </div>
-    <div class="secret-box" id="box2">
-        <span class="box-emoji">🎁</span>
-        <span class="box-prize"></span>
-    </div>
-    <div class="secret-box" id="box3">
-        <span class="box-emoji">🎁</span>
-        <span class="box-prize"></span>
-    </div>
-</div>
+                <div class="secret-box" id="box1">
+                    <span class="box-emoji">🎁</span>
+                    <span class="box-prize"></span>
+                </div>
+                <div class="secret-box" id="box2">
+                    <span class="box-emoji">🎁</span>
+                    <span class="box-prize"></span>
+                </div>
+                <div class="secret-box" id="box3">
+                    <span class="box-emoji">🎁</span>
+                    <span class="box-prize"></span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script type="module" src="game.js"></script>
+
 </body>
 </html>
