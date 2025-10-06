@@ -2,36 +2,38 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Kollektif:wght@700&display=swap');
 
+/* NEW: Your updated colour palette */
 :root {
     --dark-blue: #0b2027;
     --mid-blue: #4f8ca1;
     --teal: #70a9a1;
     --light-grey: #cfd7c7;
-    --azure: #edf7f6;
-    --white: #fcfcff
+    --azure: #edf7f6; /* Lightest background */
+    --white: #fcfcff;   /* Pure white for text and elements */
 }
 
+/* CORRECTED: Body now has a dark text colour to be visible on the light background */
 body {
-    font-family: 'Montserrat', sans-serif; /* Montserrat for body text */
+    font-family: 'Montserrat', sans-serif;
     background-color: var(--azure);
-    color: var(--white);
+    color: var(--dark-blue); /* CORRECTED: Dark text on light background */
     margin: 0;
     padding: 20px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
-    font-size: 18px; 
-}
+    font-size: 18px;
 }
 
 .container {
-    background-color: var(--mid-blue);
+    background-color: var(--white); /* UPDATED: Main container is now white */
     padding: 2rem;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Softer shadow */
     width: 100%;
     max-width: 900px;
+    border: 1px solid var(--light-grey); /* Adds a subtle border */
 }
 
 .centered {
@@ -40,19 +42,20 @@ body {
     margin-top: 5vh;
 }
 
-h1, h2, h3, h4 { 
-    font-family: 'Kollektif', sans-serif; /* Kollektif for all headings */
-    color: var(--white);
+/* UPDATED: Headings now use the dark blue colour */
+h1, h2, h3, h4 {
+    font-family: 'Kollektif', sans-serif;
+    color: var(--dark-blue);
     text-align: center;
 }
 
 p {
-    color: var(--light-grey);
+    color: #555; /* Darker grey for better readability on white */
 }
 
 /* --- Buttons --- */
 .btn {
-    background-color: var(--teal);
+    background-color: var(--mid-blue); /* UPDATED */
     color: var(--white);
     border: none;
     padding: 15px 30px;
@@ -66,12 +69,12 @@ p {
 }
 
 .btn:hover:not(:disabled) {
-    background-color: #8bc4ba;
+    background-color: var(--teal);
     transform: translateY(-2px);
 }
 
 .btn:disabled {
-    background-color: #5a7a74;
+    background-color: var(--light-grey);
     cursor: not-allowed;
     color: #999;
 }
@@ -92,21 +95,21 @@ p {
     display: block;
     margin-bottom: 8px;
     font-size: 1.1rem;
-    color: var(--light-grey);
+    color: var(--dark-blue);
 }
 .form-group input, select {
     width: 100%;
     padding: 12px;
     border-radius: 5px;
     border: 2px solid var(--light-grey);
-    background-color: var(--white);
+    background-color: var(--azure);
     color: var(--dark-blue);
     font-size: 1.2rem;
     box-sizing: border-box;
 }
 
 .error {
-    color: #ff8a8a;
+    color: #d94545;
     margin-top: 10px;
     height: 20px;
 }
@@ -114,7 +117,7 @@ p {
 .back-link {
     display: block;
     margin-top: 20px;
-    color: var(--light-grey);
+    color: var(--mid-blue);
 }
 
 /* --- Create Page --- */
@@ -124,9 +127,10 @@ p {
     gap: 2rem;
 }
 .setup-column {
-    background-color: rgba(11, 32, 39, 0.4);
+    background-color: var(--azure); /* UPDATED: Lighter background */
     padding: 1.5rem;
     border-radius: 8px;
+    border: 1px solid var(--light-grey);
 }
 .game-code-container {
     background-color: var(--dark-blue);
@@ -148,14 +152,16 @@ p {
     margin: 1rem 0;
 }
 .checkbox-grid label {
-    background-color: var(--mid-blue);
+    background-color: var(--white);
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s;
+    border: 1px solid var(--light-grey);
 }
 .checkbox-grid label:hover {
-    background-color: #528a99;
+    background-color: var(--teal);
+    color: var(--white);
 }
 #team-list {
     list-style-type: none;
@@ -165,6 +171,7 @@ p {
     border-radius: 5px;
     min-height: 100px;
     padding: 10px;
+    border: 1px solid var(--light-grey);
 }
 
 /* --- Timer & Leaderboard --- */
@@ -188,11 +195,11 @@ p {
     border-radius: 4px;
 }
 .leaderboard-entry:nth-child(odd) {
-    background-color: var(--teal);
+    background-color: var(--light-grey);
     color: var(--dark-blue);
 }
 .leaderboard-entry:nth-child(even) {
-    background-color: #609890;
+    background-color: var(--azure);
     color: var(--dark-blue);
 }
 
@@ -205,6 +212,7 @@ p {
     background-color: var(--dark-blue);
     padding: 1rem;
     border-radius: 8px;
+    color: var(--white);
 }
 #team-name-display, #score-display {
     font-size: 1.5rem;
@@ -214,7 +222,7 @@ p {
     font-size: 3rem;
     text-align: center;
     margin-bottom: 2rem;
-    background-color: var(--white);
+    background-color: var(--azure);
     color: var(--dark-blue);
     padding: 20px;
     border-radius: 8px;
@@ -229,109 +237,22 @@ p {
     height: 80px;
     font-size: 1.8rem;
 }
-.btn.correct { background-color: #63d471; }
-.btn.incorrect { background-color: #ff6b6b; }
+.btn.correct { background-color: #63d471 !important; color: white !important; }
+.btn.incorrect { background-color: #d94545 !important; color: white !important; }
 
-.pv-chart {
-    margin-top: 2rem;
-    text-align: center;
-}
-.pv-chart img {
-    max-width: 100%;
-    border-radius: 5px;
-    background-color: white;
-}
-
-.secret-box {
-    position: relative; /* Needed for positioning the prize text */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.box-prize {
-    position: absolute;
-    bottom: -30px; /* Position it just below the box */
-    left: 0;
-    right: 0;
-    font-size: 1.5rem; /* Make it a readable size */
-    font-weight: bold;
-    color: var(--white);
-    opacity: 0; /* Hidden by default */
-    transition: opacity 0.3s;
-}
-
-.box-prize.revealed {
-    opacity: 1; /* Make it visible when revealed */
-}
-
-/* --- Utility --- */
-.hidden { display: none !important; }
-
-/* --- Spinner --- */
-.spinner {
-    border: 8px solid var(--light-grey);
-    border-top: 8px solid var(--teal);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-    margin: 2rem auto;
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* --- Modal --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-.modal-content {
-    background-color: var(--mid-blue);
-    padding: 30px 40px; /* Increased padding */
-    border-radius: 10px;
-    text-align: center;
-    min-width: 300px; /* Ensures it has some width */
-}
-.secret-box-container {
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-}
-.secret-box {
-    font-size: 6rem; /* Much bigger! */
-    cursor: pointer;
-    transition: transform 0.2s;
-    padding: 10px 20px; /* Add some space around the emoji */
-}
-.secret-box:hover {
-    transform: scale(1.1);
-}
+/* ... (Keep existing .pv-chart, .secret-box, .box-prize rules) ... */
 
 /* --- Place Value Table Styles --- */
 #place-value-table {
   margin-top: 2rem;
   padding: 1rem;
-  background-color: var(--white); /* Matches header background */
+  background-color: var(--white);
   border-radius: 8px;
 }
-
 #place-value-table table {
   width: 100%;
   border-collapse: collapse;
 }
-
 #place-value-table th, 
 #place-value-table td {
   border: 2px solid var(--mid-blue);
@@ -340,30 +261,4 @@ p {
   color: var(--dark-blue);
   font-weight: bold;
 }
-
-#place-value-table th {
-  background-color: var(--teal);
-  font-size: 0.9rem;
-}
-
-#place-value-table td {
-  background-color: var(--white);
-  font-size: 1.1rem;
-}
-
-/* --- Responsive Design --- */
-@media (max-width: 768px) {
-    .game-setup-grid {
-        grid-template-columns: 1fr;
-    }
-    .options-grid {
-        grid-template-columns: 1fr;
-    }
-    .game-header {
-        flex-direction: column;
-        gap: 10px;
-    }
-    .question {
-        font-size: 2rem;
-    }
-}
+#place
