@@ -149,6 +149,12 @@ p {
     color: var(--white);
     letter-spacing: 4px;
 }
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Creates a two-column layout */
+    gap: 10px;
+    margin: 1rem 0;
+}
 .checkbox-grid label:hover {
     background-color: var(--accent-cyan); /* UPDATED */
     color: var(--dark-blue);
