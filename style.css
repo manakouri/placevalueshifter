@@ -2,26 +2,24 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Kollektif:wght@700&display=swap');
 
-/* NEW: Your updated colour palette */
 :root {
     --dark-blue: #0b2027;
     --mid-blue: #4f8ca1;
     --teal: #70a9a1;
     --light-grey: #cfd7c7;
-    --azure: #edf7f6; /* Lightest background */
-    --white: #fcfcff;   /* Pure white for text and elements */
+    --azure: #edf7f6;
+    --white: #fcfcff;
     --darker-azure: #ccedea;
 
-     --accent-pink: #f84791;
+    --accent-pink: #f84791;
     --accent-cyan: #57dbd8;
     --accent-deep-blue: #25388e;
 }
 
-/* CORRECTED: Body now has a dark text colour to be visible on the light background */
 body {
     font-family: 'Montserrat', sans-serif;
     background-color: var(--azure);
-    color: var(--dark-blue); /* CORRECTED: Dark text on light background */
+    color: var(--dark-blue);
     margin: 0;
     padding: 20px;
     display: flex;
@@ -32,13 +30,13 @@ body {
 }
 
 .container {
-    background-color: var(--white); /* UPDATED: Main container is now white */
+    background-color: var(--white);
     padding: 2rem;
     border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Softer shadow */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 900px;
-    border: 1px solid var(--light-grey); /* Adds a subtle border */
+    border: 1px solid var(--light-grey);
 }
 
 .centered {
@@ -47,19 +45,19 @@ body {
     margin-top: 5vh;
 }
 
-h1, h2, h3, h4 { 
+h1, h2, h3, h4 {
     font-family: 'Kollektif', sans-serif;
-    color: var(--accent-deep-blue); /* UPDATED: Vibrant blue for headings */
+    color: var(--accent-deep-blue);
     text-align: center;
 }
 
 p {
-    color: #555; /* Darker grey for better readability on white */
+    color: #555;
 }
 
 /* --- Buttons --- */
 .btn {
-    background-color: var(--mid-blue); /* UPDATED */
+    background-color: var(--mid-blue);
     color: var(--white);
     border: none;
     padding: 15px 30px;
@@ -73,9 +71,9 @@ p {
 }
 
 .btn:hover:not(:disabled) {
-    background-color: var(--accent-cyan); /* UPDATED: Bright cyan on hover */
+    background-color: var(--accent-cyan);
     transform: translateY(-2px);
-    color: var(--dark-blue); /* Change text for better contrast */
+    color: var(--dark-blue);
 }
 
 .btn:disabled {
@@ -132,13 +130,13 @@ p {
     gap: 2rem;
 }
 .setup-column {
-    background-color: var(--darker-azure); /* UPDATED: Lighter background */
+    background-color: var(--darker-azure);
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid var(--light-grey);
 }
 .game-code-container {
-    background-color: var(--white); /* UPDATED */
+    background-color: var(--accent-deep-blue);
     padding: 15px;
     text-align: center;
     border-radius: 5px;
@@ -147,30 +145,26 @@ p {
 #game-code-display {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--accent-deep-blue);
+    color: var(--white); /* Changed to white for better contrast */
     letter-spacing: 4px;
 }
 .checkbox-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Creates a two-column layout */
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin: 1rem 0;
-}
-.checkbox-grid label:hover {
-    background-color: var(--accent-cyan); /* UPDATED */
-    color: var(--dark-blue);
 }
 .checkbox-grid label {
     background-color: var(--white);
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.2s;
     border: 1px solid var(--light-grey);
 }
 .checkbox-grid label:hover {
-    background-color: var(--teal);
-    color: var(--white);
+    background-color: var(--accent-cyan);
+    color: var(--dark-blue);
 }
 #team-list {
     list-style-type: none;
@@ -246,13 +240,25 @@ p {
     height: 80px;
     font-size: 1.8rem;
 }
-.btn.correct { 
-    background-color: var(--accent-pink) !important; /* UPDATED: Fun pink for correct answers */
-    color: var(--white) !important; 
+.btn.correct {
+    background-color: var(--accent-pink) !important;
+    color: var(--white) !important;
 }
-.btn.incorrect { background-color: #d94545 !important; color: white !important; }
+.btn.incorrect {
+    background-color: #d94545 !important;
+    color: white !important;
+}
 
-/* ... (Keep existing .pv-chart, .secret-box, .box-prize rules) ... */
+/* --- Place Value Chart (Static Image) --- */
+.pv-chart {
+    margin-top: 2rem;
+    text-align: center;
+}
+.pv-chart img {
+    max-width: 100%;
+    border-radius: 5px;
+    background-color: white;
+}
 
 /* --- Place Value Table Styles --- */
 #place-value-table {
@@ -265,7 +271,7 @@ p {
   width: 100%;
   border-collapse: collapse;
 }
-#place-value-table th, 
+#place-value-table th,
 #place-value-table td {
   border: 2px solid var(--mid-blue);
   padding: 0.5rem;
@@ -273,20 +279,15 @@ p {
   color: var(--dark-blue);
   font-weight: bold;
 }
-#place
-
-/* --- Place Value Chart (Static Image) --- */
-.pv-chart {
-    margin-top: 2rem;
-    text-align: center;
+#place-value-table th {
+  background-color: var(--teal);
+  color: var(--white);
+  font-size: 0.9rem;
 }
-
-.pv-chart img {
-    max-width: 100%;
-    border-radius: 5px;
-    background-color: white;
+#place-value-table td {
+  background-color: var(--azure);
+  font-size: 1.1rem;
 }
-
 
 /* --- Modal & Mystery Box --- */
 .modal-overlay {
@@ -301,7 +302,6 @@ p {
     align-items: center;
     z-index: 1000;
 }
-
 .modal-content {
     background-color: var(--white);
     padding: 30px 40px;
@@ -311,13 +311,11 @@ p {
     box-shadow: 0 5px 25px rgba(0,0,0,0.2);
     border: 1px solid var(--light-grey);
 }
-
 .secret-box-container {
     display: flex;
     gap: 20px;
     margin-top: 20px;
 }
-
 .secret-box {
     position: relative;
     display: flex;
@@ -329,11 +327,9 @@ p {
     transition: transform 0.2s;
     padding: 10px 20px;
 }
-
 .secret-box:hover {
     transform: scale(1.1);
 }
-
 .box-prize {
     position: absolute;
     bottom: -30px;
@@ -344,9 +340,45 @@ p {
     color: var(--accent-pink);
     opacity: 0;
     transition: opacity 0.3s;
-    pointer-events: none; /* Prevents prize text from interfering with clicks */
+    pointer-events: none;
 }
-
 .box-prize.revealed {
     opacity: 1;
+}
+
+/* --- Utility --- */
+.hidden {
+    display: none !important;
+}
+
+/* --- Spinner --- */
+.spinner {
+    border: 8px solid var(--light-grey);
+    border-top: 8px solid var(--teal);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .game-setup-grid {
+        grid-template-columns: 1fr;
+    }
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+    .game-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .question {
+        font-size: 2rem;
+    }
 }
