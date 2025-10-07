@@ -262,13 +262,21 @@ function startTimer(startTimeMillis, lengthMinutes) {
     const gameLengthMillis = lengthMinutes * 60 * 1000;
     const endTime = startTimeMillis + gameLengthMillis;
 
-    timerInterval = setInterval(() => {
-        const now = Date.now();
-        const remainingMillis = endTime - now;
+    // Clear any previous timers just in case
+    if (timerInterval) clearInterval(timerInterval);
+
+    timerInterval = setInterval(async () => {
+        const remainingMillis = endTime - Date.now();
 
         if (remainingMillis <= 0) {
             clearInterval(timerInterval);
             gameTimerDisplay.textContent = '00:00';
+
+            // NEW: Trigger the end-game sequence
+            const gameDoc = await getDoc(gameDocRef);
+            if (gameDoc.exists()) {
+                endGame(gameDoc.data().players[teamName]);
+            }
             return;
         }
 
