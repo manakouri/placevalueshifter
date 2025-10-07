@@ -162,30 +162,27 @@ async function startGame() {
 }
 
 function startTimer(minutes) {
-    // We need to get the official start time from Firebase
+    const gameLengthMillis = minutes * 60 * 1000;
+
+    // We get the official start time from Firebase
     getDoc(gameDocRef).then(docSnap => {
         if (!docSnap.exists() || !docSnap.data().gameStartTime) return;
 
         const startTimeMillis = docSnap.data().gameStartTime.toMillis();
-        const gameLengthMillis = minutes * 60 * 1000;
         const endTime = startTimeMillis + gameLengthMillis;
 
         const timerInterval = setInterval(async () => {
-            const now = Date.now();
-            const remainingMillis = endTime - now;
+            const remainingMillis = endTime - Date.now();
 
             if (remainingMillis <= 0) {
                 clearInterval(timerInterval);
                 timerDisplay.textContent = '00:00';
-                // Stop generating questions if the game is over
-                if (gameUpdateInterval) clearInterval(gameUpdateInterval); 
                 
                 // Only the host sets the game state to finished
                 const gameDoc = await getDoc(gameDocRef);
-                if (gameDoc.data().gameState !== 'finished') {
+                if (gameDoc.exists() && gameDoc.data().gameState !== 'finished') {
                     await updateDoc(gameDocRef, { gameState: 'finished' });
                 }
-                if (unsubscribeFromPlayers) unsubscribeFromPlayers();
                 return;
             }
 
