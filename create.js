@@ -1,7 +1,7 @@
 // create.js
-import { db, auth } from './firebase-config.js'; // <-- Make sure auth is imported
+import { db, auth } from './firebase-config.js';
 import { doc, getDoc, setDoc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
-import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"; // <-- Add new imports
+import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
 
 // DOM Elements
 const gameCodeDisplay = document.getElementById('game-code-display');
@@ -16,45 +16,37 @@ const finalLeaderboardDiv = document.getElementById('final-leaderboard');
 let gameCode;
 let gameDocRef;
 let unsubscribeFromPlayers;
-let gameUpdateInterval;
 let gameDataForDownload = {};
 
-/**
- * Main function to set up the game on page load.
- * It generates a code, displays it immediately, and then
- * validates and creates the game in the database.
- */
+// --- Authentication ---
+function signInPlayerAnonymously() {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("User is signed in with uid:", user.uid);
+    } else {
+      signInAnonymously(auth).catch((error) => console.error("Anonymous sign-in failed:", error));
+    }
+  });
+}
+
+// --- Game Initialization ---
 async function setupGame() {
-    // 1. Generate and display a code immediately for the user.
     const initialCode = Math.floor(1000000 + Math.random() * 9000000).toString();
     gameCodeDisplay.textContent = initialCode;
-
-    // 2. Start the process of validating the code and creating the game.
     await validateAndCreateGame(initialCode);
 }
 
-/**
- * Checks if a game code is unique. If it is, creates the game.
- * If not, generates a new code and repeats the process.
- * @param {string} codeToValidate The game code to check.
- */
 async function validateAndCreateGame(codeToValidate) {
     const potentialDocRef = doc(db, 'games', codeToValidate);
-    
     try {
         const docSnap = await getDoc(potentialDocRef);
-
         if (docSnap.exists()) {
-            // If code is taken, generate a new one, display it, and try again.
-            console.warn(`Code ${codeToValidate} exists. Generating a new one.`);
             const newCode = Math.floor(1000000 + Math.random() * 9000000).toString();
             gameCodeDisplay.textContent = newCode;
-            await validateAndCreateGame(newCode); // Recursive call with the new code
+            await validateAndCreateGame(newCode);
         } else {
-            // The code is unique and available. Let's create the game.
             gameCode = codeToValidate;
             gameDocRef = potentialDocRef;
-            
             const questionTypes = getSelectedQuestionTypes();
             const gameLength = document.getElementById('game-length').value;
 
@@ -63,38 +55,21 @@ async function validateAndCreateGame(codeToValidate) {
                 gameLengthMinutes: parseInt(gameLength, 10),
                 questionTypes: questionTypes,
                 players: {},
-                gameState: 'waiting', // waiting, running, finished
+                gameState: 'waiting',
                 createdAt: serverTimestamp()
             });
 
-            // Now that the game is created, start listening for players.
+            // This is the crucial call that starts listening for players
             listenForPlayers();
         }
     } catch (error) {
-        console.error("Firebase Error: Could not validate or create game.", error);
+        console.error("Firebase Error:", error);
         gameCodeDisplay.textContent = "ERROR";
-        alert("Could not connect to the server to create a game. Please check your internet connection and refresh the page.");
+        alert("Could not connect to the server. Please refresh the page.");
     }
 }
 
-// Add this new function to handle signing in
-function signInPlayerAnonymously() {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // User is already signed in.
-      console.log("User is signed in with uid:", user.uid);
-    } else {
-      // User is not signed in. Sign them in anonymously.
-      signInAnonymously(auth).catch((error) => {
-        console.error("Anonymous sign-in failed:", error);
-      });
-    }
-  });
-}
-
-// Call the function as soon as the script loads
-signInPlayerAnonymously();
-// --- Player & Leaderboard Updates ---
+// --- Real-time Listener ---
 function listenForPlayers() {
     unsubscribeFromPlayers = onSnapshot(gameDocRef, (doc) => {
         const gameData = doc.data();
@@ -102,158 +77,18 @@ function listenForPlayers() {
 
         const players = gameData.players || {};
 
-        // This is the key part that updates the list on the screen
+        // This function updates the list on the screen
         updateTeamList(Object.keys(players)); 
         
         if (gameData.gameState !== 'waiting') {
             updateLeaderboard(players);
         }
         
-        // This logic enables/disables the start button
         if (Object.keys(players).length > 0 && gameData.gameState === 'waiting') {
             startGameBtn.disabled = false;
         } else if (gameData.gameState === 'waiting') {
             startGameBtn.disabled = true;
         }
 
-        // This triggers the final results screen for the host
         if (gameData.gameState === 'finished') {
-            showFinalResults(players);
-        }
-    });
-}
-
-function updateTeamList(playerNames) {
-    const heading = document.getElementById('teams-joined-heading');
-    heading.textContent = `Teams Joined (${playerNames.length})`; // Show count in heading
-    
-    teamList.innerHTML = '';
-    if (playerNames.length === 0) {
-        teamList.innerHTML = '<li>Waiting for teams to join...</li>';
-    } else {
-        playerNames.forEach(name => {
-            const li = document.createElement('li');
-            li.textContent = name;
-            teamList.appendChild(li);
-        });
-    }
-}
-
-function updateLeaderboard(players) {
-    leaderboardDiv.innerHTML = '';
-    const sortedPlayers = Object.entries(players).sort((a, b) => b[1].score - a[1].score);
-
-    sortedPlayers.forEach(([name, data]) => {
-        const entry = document.createElement('div');
-        entry.className = 'leaderboard-entry';
-        entry.innerHTML = `<span>${name}</span><span>${data.score}</span>`;
-        leaderboardDiv.appendChild(entry);
-    });
-}
-
-// --- Game Logic ---
-async function startGame() {
-    startGameBtn.disabled = true;
-    const gameLength = document.getElementById('game-length').value;
-    const questionTypes = getSelectedQuestionTypes();
-    
-    // The host just tells everyone the game has started and when.
-    await updateDoc(gameDocRef, {
-        gameState: 'running',
-        gameStartTime: serverTimestamp(),
-        gameLengthMinutes: parseInt(gameLength, 10),
-        questionTypes: questionTypes // Players will read this to generate their own questions
-    });
-
-    startTimer(parseInt(gameLength, 10));
-}
-
-function startTimer(minutes) {
-    const gameLengthMillis = minutes * 60 * 1000;
-
-    getDoc(gameDocRef).then(docSnap => {
-        if (!docSnap.exists() || !docSnap.data().gameStartTime) return;
-
-        const startTimeMillis = docSnap.data().gameStartTime.toMillis();
-        const endTime = startTimeMillis + gameLengthMillis;
-
-        const timerInterval = setInterval(async () => {
-            const remainingMillis = endTime - Date.now();
-
-            if (remainingMillis <= 0) {
-                clearInterval(timerInterval);
-                timerDisplay.textContent = '00:00';
-                
-                const gameDoc = await getDoc(gameDocRef);
-                if (gameDoc.exists() && gameDoc.data().gameState !== 'finished') {
-                    await updateDoc(gameDocRef, { gameState: 'finished' });
-                }
-                return;
-            }
-
-            const remainingSeconds = Math.floor(remainingMillis / 1000);
-            const mins = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
-            const secs = (remainingSeconds % 60).toString().padStart(2, '0');
-            timerDisplay.textContent = `${mins}:${secs}`;
-        }, 1000);
-    });
-}
-
-function showFinalResults(players) {
-    gameDataForDownload = players; // Save data for download
-    finalResultsDiv.classList.remove('hidden');
-    leaderboardDiv.classList.add('hidden');
-    finalLeaderboardDiv.innerHTML = '';
-    
-    const sortedPlayers = Object.entries(players).sort((a, b) => b[1].score - a[1].score);
-
-    sortedPlayers.forEach(([name, data], index) => {
-        const accuracy = data.questionsAnswered > 0 ? ((data.questionsCorrect / data.questionsAnswered) * 100).toFixed(0) : 0;
-        const entry = document.createElement('div');
-        entry.className = 'leaderboard-entry';
-        entry.innerHTML = `
-            <span><strong>${index + 1}.</strong> ${name}</span>
-            <span>Score: ${data.score}</span>
-            <span>Correct: ${data.questionsCorrect}</span>
-            <span>Accuracy: ${accuracy}%</span>
-        `;
-        finalLeaderboardDiv.appendChild(entry);
-    });
-}
-
-function getSelectedQuestionTypes() {
-    const checkboxes = document.querySelectorAll('input[name="q-type"]');
-    const types = {};
-    checkboxes.forEach(cb => {
-        types[cb.value] = cb.checked;
-    });
-    return types;
-}
-
-function downloadResults() {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Rank,Team Name,Score,Questions Correct,Questions Answered,Accuracy (%)\r\n";
-
-    const sortedPlayers = Object.entries(gameDataForDownload).sort((a, b) => b[1].score - a[1].score);
-    
-    sortedPlayers.forEach(([name, data], index) => {
-        const rank = index + 1;
-        const accuracy = data.questionsAnswered > 0 ? ((data.questionsCorrect / data.questionsAnswered) * 100).toFixed(0) : 0;
-        let row = `${rank},${name},${data.score},${data.questionsCorrect},${data.questionsAnswered},${accuracy}`;
-        csvContent += row + "\r\n";
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `place-value-shifter-results-${gameCode}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-
-// --- Event Listeners ---
-window.addEventListener('load', setupGame);
-startGameBtn.addEventListener('click', startGame);
-document.getElementById('download-btn').addEventListener('click', downloadResults);
+            showFinalResults(players
