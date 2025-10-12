@@ -91,4 +91,140 @@ function listenForPlayers() {
         }
 
         if (gameData.gameState === 'finished') {
-            showFinalResults(players
+            showFinalResults(players);
+        }
+    });
+}
+
+// --- UI Update Functions ---
+function updateTeamList(playerNames) {
+    const heading = document.getElementById('teams-joined-heading');
+    heading.textContent = `Teams Joined (${playerNames.length})`;
+    
+    teamList.innerHTML = '';
+    if (playerNames.length === 0) {
+        teamList.innerHTML = '<li>Waiting for teams to join...</li>';
+    } else {
+        playerNames.forEach(name => {
+            const li = document.createElement('li');
+            li.textContent = name;
+            teamList.appendChild(li);
+        });
+    }
+}
+
+function updateLeaderboard(players) {
+    leaderboardDiv.innerHTML = '';
+    const sortedPlayers = Object.entries(players).sort((a, b) => b[1].score - a[1].score);
+    sortedPlayers.forEach(([name, data]) => {
+        const entry = document.createElement('div');
+        entry.className = 'leaderboard-entry';
+        entry.innerHTML = `<span>${name}</span><span>${data.score}</span>`;
+        leaderboardDiv.appendChild(entry);
+    });
+}
+
+// --- Game Logic ---
+async function startGame() {
+    startGameBtn.disabled = true;
+    const gameLength = document.getElementById('game-length').value;
+    const questionTypes = getSelectedQuestionTypes();
+    
+    await updateDoc(gameDocRef, {
+        gameState: 'running',
+        gameStartTime: serverTimestamp(),
+        gameLengthMinutes: parseInt(gameLength, 10),
+        questionTypes: questionTypes
+    });
+
+    startTimer(parseInt(gameLength, 10));
+}
+
+function startTimer(minutes) {
+    const gameLengthMillis = minutes * 60 * 1000;
+    getDoc(gameDocRef).then(docSnap => {
+        if (!docSnap.exists() || !docSnap.data().gameStartTime) return;
+        const startTimeMillis = docSnap.data().gameStartTime.toMillis();
+        const endTime = startTimeMillis + gameLengthMillis;
+        const timerInterval = setInterval(async () => {
+            const remainingMillis = endTime - Date.now();
+            if (remainingMillis <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = '00:00';
+                const gameDoc = await getDoc(gameDocRef);
+                if (gameDoc.exists() && gameDoc.data().gameState !== 'finished') {
+                    await updateDoc(gameDocRef, { gameState: 'finished' });
+                }
+                return;
+            }
+            const remainingSeconds = Math.floor(remainingMillis / 1000);
+            const mins = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+            const secs = (remainingSeconds % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${mins}:${secs}`;
+        }, 1000);
+    });
+}
+
+function showFinalResults(players) {
+    gameDataForDownload = players;
+    finalResultsDiv.classList.remove('hidden');
+    leaderboardDiv.classList.add('hidden');
+    finalLeaderboardDiv.innerHTML = '';
+    const sortedPlayers = Object.entries(players).sort((a, b) => b[1].score - a[1].score);
+    sortedPlayers.forEach(([name, data], index) => {
+        const accuracy = data.questionsAnswered > 0 ? ((data.questionsCorrect / data.questionsAnswered) * 100).toFixed(0) : 0;
+        const entry = document.createElement('div');
+        entry.className = 'leaderboard-entry';
+        entry.innerHTML = `
+            <span><strong>${index + 1}.</strong> ${name}</span>
+            <span>Score: ${data.score}</span>
+            <span>Correct: ${data.questionsCorrect}</span>
+            <span>Accuracy: ${accuracy}%</span>
+        `;
+        finalLeaderboardDiv.appendChild(entry);
+    });
+}
+
+function getSelectedQuestionTypes() {
+    const checkboxes = document.querySelectorAll('input[name="q-type"]');
+    const types = {};
+    checkboxes.forEach(cb => {
+        types[cb.value] = cb.checked;
+    });
+    return types;
+}
+
+// --- Download Logic ---
+function downloadResults() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Rank,Team Name,Score,Questions Correct,Questions Answered,Accuracy (%)\r\n";
+    const sortedPlayers = Object.entries(gameDataForDownload).sort((a, b) => b[1].score - a[1].score);
+    sortedPlayers.forEach(([name, data], index) => {
+        const rank = index + 1;
+        const accuracy = data.questionsAnswered > 0 ? ((data.questionsCorrect / data.questionsAnswered) * 100).toFixed(0) : 0;
+        let row = `${rank},${name},${data.score},${data.questionsCorrect},${data.questionsAnswered},${accuracy}`;
+        csvContent += row + "\r\n";
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `place-value-shifter-results-${gameCode}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// --- Event Listeners ---
+window.addEventListener('load', () => {
+    // Moved these inside the listener to guarantee the elements exist
+    const startGameBtn = document.getElementById('start-game-btn');
+    const downloadBtn = document.getElementById('download-btn');
+
+    // Add the event listeners here
+    startGameBtn.addEventListener('click', startGame);
+    downloadBtn.addEventListener('click', downloadResults);
+    
+    // Now, run the startup functions
+    signInPlayerAnonymously();
+    setupGame();
+});
