@@ -287,16 +287,26 @@ function startTimer(startTimeMillis, lengthMinutes) {
     }, 1000);
 }
 
-function endGame(playerData) {
+async function endGame(playerData) {
     if (timerInterval) clearInterval(timerInterval);
     questionArea.classList.add('hidden');
     postGameArea.classList.remove('hidden');
+
+    // Fetch the final game data to determine placings
+    const finalDoc = await getDoc(gameDocRef);
+    const finalPlayers = finalDoc.data().players;
+    
+    // Sort players by score to find the rank
+    const sortedPlayers = Object.entries(finalPlayers).sort((a, b) => b[1].score - a[1].score);
+    const playerRank = sortedPlayers.findIndex(([name, data]) => name === teamName) + 1;
 
     const accuracy = playerData.questionsAnswered > 0 
         ? ((playerData.questionsCorrect / playerData.questionsAnswered) * 100).toFixed(0) 
         : 0;
 
+    // Display final stats including the placing
     finalStats.innerHTML = `
+        <strong>Your Placing:</strong> ${playerRank}<br>
         <strong>Final Score:</strong> ${playerData.score}<br>
         <strong>Questions Correct:</strong> ${playerData.questionsCorrect}<br>
         <strong>Accuracy:</strong> ${accuracy}%
