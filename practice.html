@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Mode - Place Value Shifter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container game-container">
+        <div class="game-header">
+            <div id="high-score-display">High Score: 0</div>
+            <div id="score-display">Score: 0</div>
+            <div id="game-timer" class="timer">05:00</div>
+        </div>
+        
+        <div id="game-area">
+            <div id="question-area">
+                <div id="question-prompt" class="question"></div>
+                <div class="options-grid">
+                    <button class="btn option"></button>
+                    <button class="btn option"></button>
+                    <button class="btn option"></button>
+                    <button class="btn option"></button>
+                </div>
+            </div>
+        
+            <div id="post-game-area" class="hidden">
+                <h2>Time's Up!</h2>
+                <h3>Your Results:</h3>
+                <p id="final-stats"></p>
+                <a href="practice.html" class="btn">Play Again</a>
+                <a href="index.html" class="back-link">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="secret-box-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Correct! Choose a Secret Box!</h2>
+            <div class="secret-box-container">
+                <div class="secret-box" id="box1">
+                    <span class="box-emoji">🎁</span>
+                    <span class="box-prize"></span>
+                </div>
+                <div class="secret-box" id="box2">
+                    <span class="box-emoji">🎁</span>
+                    <span class="box-prize"></span>
+                </div>
+                <div class="secret-box" id="box3">
+                    <span class="box-emoji">🎁</span>
+                    <span class="box-prize"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="practice.js"></script>
+</body>
+</html>
