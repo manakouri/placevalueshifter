@@ -3,20 +3,14 @@ import { db, auth } from './firebase-config.js';
 import { doc, getDoc, setDoc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
 import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
 
-// DOM Elements
-const gameCodeDisplay = document.getElementById('game-code-display');
-const teamList = document.getElementById('team-list');
-const startGameBtn = document.getElementById('start-game-btn');
-const timerDisplay = document.getElementById('timer-display');
-const leaderboardDiv = document.getElementById('leaderboard');
-const finalResultsDiv = document.getElementById('final-results');
-const finalLeaderboardDiv = document.getElementById('final-leaderboard');
-
-// Global game variables
+// --- Global State Variables ---
 let gameCode;
 let gameDocRef;
 let unsubscribeFromPlayers;
 let gameDataForDownload = {};
+
+// --- DOM Element Variables (will be assigned after page loads) ---
+let gameCodeDisplay, teamList, startGameBtn, timerDisplay, leaderboardDiv, finalResultsDiv, finalLeaderboardDiv;
 
 // --- Authentication ---
 function signInPlayerAnonymously() {
@@ -58,8 +52,6 @@ async function validateAndCreateGame(codeToValidate) {
                 gameState: 'waiting',
                 createdAt: serverTimestamp()
             });
-
-            // This is the crucial call that starts listening for players
             listenForPlayers();
         }
     } catch (error) {
@@ -74,10 +66,8 @@ function listenForPlayers() {
     unsubscribeFromPlayers = onSnapshot(gameDocRef, (doc) => {
         const gameData = doc.data();
         if (!gameData) return;
-
         const players = gameData.players || {};
 
-        // This function updates the list on the screen
         updateTeamList(Object.keys(players)); 
         
         if (gameData.gameState !== 'waiting') {
@@ -136,7 +126,6 @@ async function startGame() {
         gameLengthMinutes: parseInt(gameLength, 10),
         questionTypes: questionTypes
     });
-
     startTimer(parseInt(gameLength, 10));
 }
 
@@ -202,7 +191,7 @@ function downloadResults() {
     sortedPlayers.forEach(([name, data], index) => {
         const rank = index + 1;
         const accuracy = data.questionsAnswered > 0 ? ((data.questionsCorrect / data.questionsAnswered) * 100).toFixed(0) : 0;
-        let row = `${rank},${name},${data.score},${data.questionsCorrect},${data.questionsAnswered},${accuracy}`;
+        let row = `${rank},"${name}",${data.score},${data.questionsCorrect},${data.questionsAnswered},${accuracy}`;
         csvContent += row + "\r\n";
     });
     const encodedUri = encodeURI(csvContent);
@@ -214,17 +203,23 @@ function downloadResults() {
     document.body.removeChild(link);
 }
 
-// --- Event Listeners ---
-window.addEventListener('load', () => {
-    // Moved these inside the listener to guarantee the elements exist
-    const startGameBtn = document.getElementById('start-game-btn');
+// --- Main Initializer ---
+window.addEventListener('DOMContentLoaded', () => {
+    // Assign DOM elements now that the page is fully loaded
+    gameCodeDisplay = document.getElementById('game-code-display');
+    teamList = document.getElementById('team-list');
+    startGameBtn = document.getElementById('start-game-btn');
+    timerDisplay = document.getElementById('timer-display');
+    leaderboardDiv = document.getElementById('leaderboard');
+    finalResultsDiv = document.getElementById('final-results');
+    finalLeaderboardDiv = document.getElementById('final-leaderboard');
     const downloadBtn = document.getElementById('download-btn');
 
-    // Add the event listeners here
+    // Attach event listeners
     startGameBtn.addEventListener('click', startGame);
     downloadBtn.addEventListener('click', downloadResults);
-    
-    // Now, run the startup functions
+
+    // Run startup logic
     signInPlayerAnonymously();
     setupGame();
 });
