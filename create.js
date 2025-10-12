@@ -8,6 +8,7 @@ let gameCode;
 let gameDocRef;
 let unsubscribeFromPlayers;
 let gameDataForDownload = {};
+let hostTimerStarted = false;
 
 // --- DOM Element Variables (will be assigned after page loads) ---
 let gameCodeDisplay, teamList, startGameBtn, timerDisplay, leaderboardDiv, finalResultsDiv, finalLeaderboardDiv;
@@ -68,7 +69,7 @@ function listenForPlayers() {
         if (!gameData) return;
         const players = gameData.players || {};
 
-        updateTeamList(Object.keys(players)); 
+        updateTeamList(Object.keys(players));
         
         if (gameData.gameState !== 'waiting') {
             updateLeaderboard(players);
@@ -78,6 +79,13 @@ function listenForPlayers() {
             startGameBtn.disabled = false;
         } else if (gameData.gameState === 'waiting') {
             startGameBtn.disabled = true;
+        }
+
+        // NEW LOGIC: This is where the timer will now start.
+        // It waits until the game is running AND the official startTime has arrived.
+        if (gameData.gameState === 'running' && !hostTimerStarted && gameData.gameStartTime) {
+            hostTimerStarted = true; // Set flag to prevent starting it again
+            startTimer(gameData.gameLengthMinutes, gameData.gameStartTime.toMillis());
         }
 
         if (gameData.gameState === 'finished') {
@@ -120,38 +128,39 @@ async function startGame() {
     const gameLength = document.getElementById('game-length').value;
     const questionTypes = getSelectedQuestionTypes();
     
+    // This function now ONLY tells Firebase to start the game.
+    // It does NOT try to start the timer itself.
     await updateDoc(gameDocRef, {
         gameState: 'running',
         gameStartTime: serverTimestamp(),
         gameLengthMinutes: parseInt(gameLength, 10),
         questionTypes: questionTypes
     });
-    startTimer(parseInt(gameLength, 10));
 }
 
-function startTimer(minutes) {
+function startTimer(minutes, startTimeMillis) {
     const gameLengthMillis = minutes * 60 * 1000;
-    getDoc(gameDocRef).then(docSnap => {
-        if (!docSnap.exists() || !docSnap.data().gameStartTime) return;
-        const startTimeMillis = docSnap.data().gameStartTime.toMillis();
-        const endTime = startTimeMillis + gameLengthMillis;
-        const timerInterval = setInterval(async () => {
-            const remainingMillis = endTime - Date.now();
-            if (remainingMillis <= 0) {
-                clearInterval(timerInterval);
-                timerDisplay.textContent = '00:00';
-                const gameDoc = await getDoc(gameDocRef);
-                if (gameDoc.exists() && gameDoc.data().gameState !== 'finished') {
-                    await updateDoc(gameDocRef, { gameState: 'finished' });
-                }
-                return;
+    const endTime = startTimeMillis + gameLengthMillis;
+
+    const timerInterval = setInterval(async () => {
+        const remainingMillis = endTime - Date.now();
+
+        if (remainingMillis <= 0) {
+            clearInterval(timerInterval);
+            timerDisplay.textContent = '00:00';
+            
+            const gameDoc = await getDoc(gameDocRef);
+            if (gameDoc.exists() && gameDoc.data().gameState !== 'finished') {
+                await updateDoc(gameDocRef, { gameState: 'finished' });
             }
-            const remainingSeconds = Math.floor(remainingMillis / 1000);
-            const mins = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
-            const secs = (remainingSeconds % 60).toString().padStart(2, '0');
-            timerDisplay.textContent = `${mins}:${secs}`;
-        }, 1000);
-    });
+            return;
+        }
+
+        const remainingSeconds = Math.floor(remainingMillis / 1000);
+        const mins = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+        const secs = (remainingSeconds % 60).toString().padStart(2, '0');
+        timerDisplay.textContent = `${mins}:${secs}`;
+    }, 1000);
 }
 
 function showFinalResults(players) {
