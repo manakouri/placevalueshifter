@@ -101,22 +101,25 @@ function listenForPlayers() {
         if (!gameData) return;
 
         const players = gameData.players || {};
-        updateTeamList(Object.keys(players));
+
+        // This is the key part that updates the list on the screen
+        updateTeamList(Object.keys(players)); 
         
         if (gameData.gameState !== 'waiting') {
             updateLeaderboard(players);
         }
         
+        // This logic enables/disables the start button
         if (Object.keys(players).length > 0 && gameData.gameState === 'waiting') {
             startGameBtn.disabled = false;
-        } else {
+        } else if (gameData.gameState === 'waiting') {
             startGameBtn.disabled = true;
         }
 
+        // This triggers the final results screen for the host
         if (gameData.gameState === 'finished') {
             showFinalResults(players);
         }
-        // NOTE: The listener for 'lastQuestionAnsweredAt' has been removed.
     });
 }
 
