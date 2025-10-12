@@ -1,7 +1,7 @@
 // join.js
-import { db, auth } from './firebase-config.js'; // <-- Make sure auth is imported
-import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
-import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"; // <-- Add new imports
+import { db, auth } from './firebase-config.js';
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
+import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
 
 // DOM Elements
 const gameCodeInput = document.getElementById('game-code');
@@ -9,30 +9,43 @@ const teamNameInput = document.getElementById('team-name');
 const joinBtn = document.getElementById('join-btn');
 const errorMessage = document.getElementById('error-message');
 
+// --- Main Initializer ---
+window.addEventListener('load', () => {
+    // Start with inputs disabled until user is signed in
+    gameCodeInput.disabled = true;
+    teamNameInput.disabled = true;
+    signInPlayerAnonymously();
+});
+
+// --- Authentication ---
+function signInPlayerAnonymously() {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User is signed in. Now they can interact with the form.
+            console.log("User is signed in with uid:", user.uid);
+            gameCodeInput.disabled = false;
+            teamNameInput.disabled = false;
+            joinBtn.textContent = "Join Game";
+            validateForm(); // Check if the button should be enabled now
+        } else {
+            // User is not signed in. Attempt to sign them in.
+            signInAnonymously(auth).catch((error) => {
+                console.error("Anonymous sign-in failed:", error);
+                errorMessage.textContent = "Could not connect to server.";
+            });
+        }
+    });
+}
+
 // --- Form Validation ---
 function validateForm() {
+    // Only enable the button if inputs are filled AND the user is signed in.
     const code = gameCodeInput.value.trim();
     const name = teamNameInput.value.trim();
-    joinBtn.disabled = !(code.length === 7 && name.length > 0);
+    const canJoin = code.length === 7 && name.length > 0 && auth.currentUser;
+    joinBtn.disabled = !canJoin;
 }
 
-// Add this new function to handle signing in
-function signInPlayerAnonymously() {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // User is already signed in.
-      console.log("User is signed in with uid:", user.uid);
-    } else {
-      // User is not signed in. Sign them in anonymously.
-      signInAnonymously(auth).catch((error) => {
-        console.error("Anonymous sign-in failed:", error);
-      });
-    }
-  });
-}
-
-// Call the function as soon as the script loads
-signInPlayerAnonymously();
 // --- Join Game Logic ---
 async function joinGame() {
     const gameCode = gameCodeInput.value.trim();
@@ -44,43 +57,40 @@ async function joinGame() {
 
     try {
         const gameDoc = await getDoc(gameDocRef);
-
         if (!gameDoc.exists()) {
             errorMessage.textContent = 'Game not found. Check the code and try again.';
             return;
         }
 
         const gameData = gameDoc.data();
-        if (gameData.players[teamName]) {
+        if (gameData.players && gameData.players[teamName]) {
             errorMessage.textContent = 'This team name is already taken.';
             return;
         }
         
-        if(Object.keys(gameData.players).length >= 20){
+        if(gameData.players && Object.keys(gameData.players).length >= 20){
             errorMessage.textContent = 'This game is full.';
             return;
         }
 
-
-        // Add player to the game document
         const playerData = {
             score: 0,
             questionsAnswered: 0,
             questionsCorrect: 0
         };
 
+        // This update will now be sent by an authenticated user
         await updateDoc(gameDocRef, {
             [`players.${teamName}`]: playerData
         });
         
-        // Navigate to game screen, passing info via URL parameters
         window.location.href = `game.html?code=${gameCode}&team=${encodeURIComponent(teamName)}`;
 
     } catch (e) {
         console.error("Error joining game: ", e);
         errorMessage.textContent = 'Could not join game. Please try again.';
     } finally {
-        validateForm(); // Re-enable button if fields are valid
+        validateForm();
     }
 }
 
