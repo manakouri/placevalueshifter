@@ -21,7 +21,7 @@ let gameDocRef;
 let currentQuestionId = null;
 let canAnswer = false;
 let correctStreak = 0;
-let nextBoxRequirement = Math.floor(Math.random() * 4) + 2; // 2-5
+let nextBoxRequirement = Math.floor(Math.random() * 3) + 1; // 1-3 correct answers
 let timerInterval;
 let gameSettings = {}; // NEW: To store question types locally
 let gameHasStarted = false;
@@ -137,7 +137,7 @@ async function handleAnswer(e) {
     setTimeout(() => {
         if (correctStreak >= nextBoxRequirement) {
             correctStreak = 0;
-            nextBoxRequirement = Math.floor(Math.random() * 4) + 2;
+            nextBoxRequirement = Math.floor(Math.random() * 3) + 1;
             showSecretBox();
         } else {
             displayNewQuestion(); // Directly generate the next question
