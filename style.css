@@ -241,7 +241,7 @@ p {
     font-size: 1.8rem;
 }
 .btn.correct {
-    background-color: var(--accent-pink) !important;
+    background-color: #54cf2b !important;
     color: var(--white) !important;
 }
 .btn.incorrect {
