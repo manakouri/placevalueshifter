@@ -60,11 +60,6 @@ async function joinGame() {
             errorMessage.textContent = 'This game is full.';
             return;
         }
-        
-        if(gameData.gameState !== 'waiting'){
-             errorMessage.textContent = 'This game has already started.';
-             return;
-        }
 
 
         // Add player to the game document
