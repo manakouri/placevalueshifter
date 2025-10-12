@@ -105,7 +105,7 @@ function displayNewQuestion() {
         });
         optionsGrid.classList.remove('hidden');
         canAnswer = true;
-    }, 4000);
+    }, 2000);
 }
 
 async function handleAnswer(e) {
@@ -114,16 +114,25 @@ async function handleAnswer(e) {
 
     const selectedAnswer = parseFloat(e.target.dataset.answer);
     const correctAnswer = parseFloat(e.target.dataset.correct);
-    
     const isCorrect = selectedAnswer === correctAnswer;
 
+    // --- Visual Feedback ---
     e.target.classList.add(isCorrect ? 'correct' : 'incorrect');
     optionButtons.forEach(btn => btn.disabled = true);
 
+    // If incorrect, also show the correct answer
+    if (!isCorrect) {
+        optionButtons.forEach(btn => {
+            if (parseFloat(btn.dataset.answer) === correctAnswer) {
+                btn.classList.add('correct');
+            }
+        });
+    }
+
+    // --- Update Firebase Stats ---
     const playerUpdate = {
         [`players.${teamName}.questionsAnswered`]: increment(1)
     };
-    
     if (isCorrect) {
         playerUpdate[`players.${teamName}.score`] = increment(100);
         playerUpdate[`players.${teamName}.questionsCorrect`] = increment(1);
@@ -131,20 +140,24 @@ async function handleAnswer(e) {
     } else {
         correctStreak = 0;
     }
-    
     await updateDoc(gameDocRef, playerUpdate);
 
+    // --- Set Delay and Move to Next Action ---
+    // If correct, wait 0.5s. If incorrect, wait 2s.
+    const delay = isCorrect ? 500 : 2000;
+
     setTimeout(() => {
-        if (correctStreak >= nextBoxRequirement) {
+        // Check for a mystery box only if the answer was correct
+        if (isCorrect && correctStreak >= nextBoxRequirement) {
             correctStreak = 0;
             nextBoxRequirement = Math.floor(Math.random() * 3) + 1;
             showSecretBox();
         } else {
-            displayNewQuestion(); // Directly generate the next question
+            // Otherwise, just get the next question
+            displayNewQuestion();
         }
-    }, 1500);
+    }, delay);
 }
-
 
 function showSecretBox() {
     secretBoxModal.classList.remove('hidden');
