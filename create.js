@@ -168,7 +168,6 @@ async function startGame() {
 function startTimer(minutes) {
     const gameLengthMillis = minutes * 60 * 1000;
 
-    // We get the official start time from Firebase
     getDoc(gameDocRef).then(docSnap => {
         if (!docSnap.exists() || !docSnap.data().gameStartTime) return;
 
@@ -182,7 +181,6 @@ function startTimer(minutes) {
                 clearInterval(timerInterval);
                 timerDisplay.textContent = '00:00';
                 
-                // Only the host sets the game state to finished
                 const gameDoc = await getDoc(gameDocRef);
                 if (gameDoc.exists() && gameDoc.data().gameState !== 'finished') {
                     await updateDoc(gameDocRef, { gameState: 'finished' });
@@ -199,24 +197,26 @@ function startTimer(minutes) {
 }
 
 function showFinalResults(players) {
+    gameDataForDownload = players; // Save data for download
     finalResultsDiv.classList.remove('hidden');
-    leaderboardDiv.classList.add('hidden'); // Hide live leaderboard
-    finalLeaderboardDiv.innerHTML = '<h3>Final Scores</h3>';
+    leaderboardDiv.classList.add('hidden');
+    finalLeaderboardDiv.innerHTML = '';
+    
     const sortedPlayers = Object.entries(players).sort((a, b) => b[1].score - a[1].score);
 
-    sortedPlayers.forEach(([name, data]) => {
+    sortedPlayers.forEach(([name, data], index) => {
         const accuracy = data.questionsAnswered > 0 ? ((data.questionsCorrect / data.questionsAnswered) * 100).toFixed(0) : 0;
         const entry = document.createElement('div');
         entry.className = 'leaderboard-entry';
         entry.innerHTML = `
-            <span><strong>${name}</strong></span>
-            <span>${data.score} pts</span>
-            <span>${data.questionsCorrect}/${data.questionsAnswered} (${accuracy}%)</span>
+            <span><strong>${index + 1}.</strong> ${name}</span>
+            <span>Score: ${data.score}</span>
+            <span>Correct: ${data.questionsCorrect}</span>
+            <span>Accuracy: ${accuracy}%</span>
         `;
         finalLeaderboardDiv.appendChild(entry);
     });
 }
-
 
 function getSelectedQuestionTypes() {
     const checkboxes = document.querySelectorAll('input[name="q-type"]');
@@ -227,6 +227,30 @@ function getSelectedQuestionTypes() {
     return types;
 }
 
+function downloadResults() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Rank,Team Name,Score,Questions Correct,Questions Answered,Accuracy (%)\r\n";
+
+    const sortedPlayers = Object.entries(gameDataForDownload).sort((a, b) => b[1].score - a[1].score);
+    
+    sortedPlayers.forEach(([name, data], index) => {
+        const rank = index + 1;
+        const accuracy = data.questionsAnswered > 0 ? ((data.questionsCorrect / data.questionsAnswered) * 100).toFixed(0) : 0;
+        let row = `${rank},${name},${data.score},${data.questionsCorrect},${data.questionsAnswered},${accuracy}`;
+        csvContent += row + "\r\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `place-value-shifter-results-${gameCode}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
 // --- Event Listeners ---
 window.addEventListener('load', setupGame);
 startGameBtn.addEventListener('click', startGame);
+document.getElementById('download-btn').addEventListener('click', downloadResults);
