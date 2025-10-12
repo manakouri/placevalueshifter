@@ -8,29 +8,47 @@
 </head>
 <body>
     <div class="container game-container">
-        <div class="game-header">
-            <div id="high-score-display">High Score: 0</div>
-            <div id="score-display">Score: 0</div>
-            <div id="game-timer" class="timer">05:00</div>
-        </div>
-        
-        <div id="game-area">
-            <div id="question-area">
-                <div id="question-prompt" class="question"></div>
-                <div class="options-grid">
-                    <button class="btn option"></button>
-                    <button class="btn option"></button>
-                    <button class="btn option"></button>
-                    <button class="btn option"></button>
-                </div>
+
+        <div id="practice-setup">
+            <h1>Practice Mode</h1>
+            <h2>Choose Question Types</h2>
+            <div class="checkbox-grid">
+                <label><input type="checkbox" name="q-type" value="w_x_10_100" checked> Whole Nos. (x10, x100)</label>
+                <label><input type="checkbox" name="q-type" value="w_d_10" checked> Whole Nos. (÷10)</label>
+                <label><input type="checkbox" name="q-type" value="w_d_100" checked> Whole Nos. (÷100)</label>
+                <label><input type="checkbox" name="q-type" value="d1_x_10_100" checked> 1dp Decimals (x10, x100)</label>
+                <label><input type="checkbox" name="q-type" value="d1_d_10" checked> 1dp Decimals (÷10)</label>
+                <label><input type="checkbox" name="q-type" value="d1_d_100"> 1dp Decimals (÷100)</label>
+                <label><input type="checkbox" name="q-type" value="d2_x_10_100"> 2dp Decimals (x10, x100)</label>
+                <label><input type="checkbox" name="q-type" value="d2_d_10"> 2dp Decimals (÷10)</label>
             </div>
-        
-            <div id="post-game-area" class="hidden">
-                <h2>Time's Up!</h2>
-                <h3>Your Results:</h3>
-                <p id="final-stats"></p>
-                <a href="practice.html" class="btn">Play Again</a>
-                <a href="index.html" class="back-link">Back to Home</a>
+            <button id="start-practice-btn" class="btn">Start Practice</button>
+            <a href="index.html" class="back-link">Back to Home</a>
+        </div>
+
+        <div id="practice-game" class="hidden">
+            <div class="game-header">
+                <div id="high-score-display">High Score: 0</div>
+                <div id="score-display">Score: 0</div>
+                <div id="game-timer" class="timer">05:00</div>
+            </div>
+            <div id="game-area">
+                <div id="question-area">
+                    <div id="question-prompt" class="question"></div>
+                    <div class="options-grid">
+                        <button class="btn option"></button>
+                        <button class="btn option"></button>
+                        <button class="btn option"></button>
+                        <button class="btn option"></button>
+                    </div>
+                </div>
+                <div id="post-game-area" class="hidden">
+                    <h2>Time's Up!</h2>
+                    <h3>Your Results:</h3>
+                    <p id="final-stats"></p>
+                    <a href="practice.html" class="btn">Play Again</a>
+                    <a href="index.html" class="back-link">Back to Home</a>
+                </div>
             </div>
         </div>
     </div>
@@ -39,18 +57,9 @@
         <div class="modal-content">
             <h2>Correct! Choose a Secret Box!</h2>
             <div class="secret-box-container">
-                <div class="secret-box" id="box1">
-                    <span class="box-emoji">🎁</span>
-                    <span class="box-prize"></span>
-                </div>
-                <div class="secret-box" id="box2">
-                    <span class="box-emoji">🎁</span>
-                    <span class="box-prize"></span>
-                </div>
-                <div class="secret-box" id="box3">
-                    <span class="box-emoji">🎁</span>
-                    <span class="box-prize"></span>
-                </div>
+                <div class="secret-box" id="box1"><span class="box-emoji">🎁</span><span class="box-prize"></span></div>
+                <div class="secret-box" id="box2"><span class="box-emoji">🎁</span><span class="box-prize"></span></div>
+                <div class="secret-box" id="box3"><span class="box-emoji">🎁</span><span class="box-prize"></span></div>
             </div>
         </div>
     </div>
