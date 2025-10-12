@@ -17,6 +17,7 @@ let gameCode;
 let gameDocRef;
 let unsubscribeFromPlayers;
 let gameUpdateInterval;
+let gameDataForDownload = {};
 
 /**
  * Main function to set up the game on page load.
@@ -120,6 +121,9 @@ function listenForPlayers() {
 }
 
 function updateTeamList(playerNames) {
+    const heading = document.getElementById('teams-joined-heading');
+    heading.textContent = `Teams Joined (${playerNames.length})`; // Show count in heading
+    
     teamList.innerHTML = '';
     if (playerNames.length === 0) {
         teamList.innerHTML = '<li>Waiting for teams to join...</li>';
